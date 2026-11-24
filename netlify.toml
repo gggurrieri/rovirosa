@@ -1,0 +1,9 @@
+# Netlify detecta Next.js y usa su adaptador oficial automáticamente.
+# Las variables NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY se cargan
+# en Netlify (Site configuration → Environment variables), nunca en este archivo.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"

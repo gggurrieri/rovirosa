@@ -1,0 +1,156 @@
+[
+  {
+    "viaje_id": "586be599-0e45-5e8c-8595-762dcbbb1ce6",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "586be599-0e45-5e8c-8595-762dcbbb1ce6",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "586be599-0e45-5e8c-8595-762dcbbb1ce6",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "93ffa728-3297-5d7c-b958-d2d7176d0596",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "ab72a0c4-d45e-5b5c-b16b-859d0fd0a197",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "ab72a0c4-d45e-5b5c-b16b-859d0fd0a197",
+    "moneda": "ARS",
+    "saldo_centavos": 140000000,
+    "estado_cobro": "pendiente",
+    "vencido": true
+  },
+  {
+    "viaje_id": "a932a9bb-9c6a-59f2-88a9-3ddad238a2da",
+    "moneda": "ARS",
+    "saldo_centavos": 130000000,
+    "estado_cobro": "pendiente",
+    "vencido": true
+  },
+  {
+    "viaje_id": "e2da57b2-ea40-5fe2-8f38-420feee55a66",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "e2da57b2-ea40-5fe2-8f38-420feee55a66",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "e2da57b2-ea40-5fe2-8f38-420feee55a66",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "eddd8fbe-c2a4-59b4-93a5-633314344889",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "267f761f-ca2c-54e0-8987-6fbfbb223992",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "267f761f-ca2c-54e0-8987-6fbfbb223992",
+    "moneda": "ARS",
+    "saldo_centavos": 320000000,
+    "estado_cobro": "pendiente",
+    "vencido": false
+  },
+  {
+    "viaje_id": "24f3d6b7-ca13-54c7-86b0-6900982c956f",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "24f3d6b7-ca13-54c7-86b0-6900982c956f",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "b2d1d1a9-239b-5923-9ac4-2531bbc73c01",
+    "moneda": "ARS",
+    "saldo_centavos": 95000000,
+    "estado_cobro": "pendiente",
+    "vencido": false
+  },
+  {
+    "viaje_id": "c909c985-b4e7-53bc-aead-ae0a4cc66ba7",
+    "moneda": "ARS",
+    "saldo_centavos": 65000000,
+    "estado_cobro": "pendiente",
+    "vencido": false
+  },
+  {
+    "viaje_id": "777aefb9-2539-579f-afdf-700a90fb193f",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "777aefb9-2539-579f-afdf-700a90fb193f",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "777aefb9-2539-579f-afdf-700a90fb193f",
+    "moneda": "ARS",
+    "saldo_centavos": 0,
+    "estado_cobro": "pagado",
+    "vencido": false
+  },
+  {
+    "viaje_id": "1cef86d6-4856-581b-85f9-4d7a3e198f16",
+    "moneda": "ARS",
+    "saldo_centavos": 60000000,
+    "estado_cobro": "pendiente",
+    "vencido": false
+  },
+  {
+    "viaje_id": "1cef86d6-4856-581b-85f9-4d7a3e198f16",
+    "moneda": "ARS",
+    "saldo_centavos": 60000000,
+    "estado_cobro": "pendiente",
+    "vencido": false
+  }
+]
