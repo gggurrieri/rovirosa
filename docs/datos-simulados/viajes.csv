@@ -1,0 +1,13 @@
+id,fecha,unidad,chofer,origen,destino,autos,capacidad,km_cargado,km_vacio,km_total,litros_esperados,litros_reales,combustible,peajes,viaticos,gastos,ingreso,margen,cobrado,saldo,estado_cobro,constancia,firma
+V101,2026-11-03,Mosquito 1,Chofer A,Buenos Aires,Córdoba,3,3,700,700,1400,462,476,809200,16800,75000,901000,2850000,1949000,2850000,0,Pagado,Sí,Sí
+V102,2026-11-04,Camioneta,Rodrigo,Buenos Aires,Rosario,1,1,300,300,600,84,85,144500,3600,0,148100,650000,501900,650000,0,Pagado,Sí,Sí
+V103,2026-11-05,Mosquito 2,Chofer B,Buenos Aires,Mendoza,2,3,1050,0,1050,346,408,693600,12600,75000,781200,2800000,2018800,1400000,1400000,Parcial,Sí,Sí
+V104,2026-11-08,Mosquito 2,Chofer B,Mendoza,Buenos Aires,1,3,1050,0,1050,346,408,693600,12600,50000,756200,1300000,543800,0,1300000,Pendiente,Sí,Sí
+V105,2026-11-09,Mosquito 1,Chofer A,Buenos Aires,Mar del Plata,3,3,400,400,800,264,272,462400,9600,50000,522000,1800000,1278000,1800000,0,Pagado,Sí,Sí
+V106,2026-11-11,Camioneta,Rodrigo,Buenos Aires,La Plata,1,1,60,60,120,17,17,28900,720,0,29620,250000,220380,250000,0,Pagado,Sí,Sí
+V107,2026-11-12,Mosquito 2,Chofer B,Buenos Aires,Santiago de Chile,2,3,1400,1400,2800,924,1090,1853000,33600,150000,2036600,6400000,4363400,3200000,3200000,Parcial,Sí,Sí
+V108,2026-11-15,Mosquito 1,Chofer A,Buenos Aires,Córdoba,2,3,700,0,700,231,238,404600,8400,50000,463000,1900000,1437000,1900000,0,Pagado,Sí,Sí
+V109,2026-11-17,Mosquito 1,Chofer A,Córdoba,Buenos Aires,1,3,700,0,700,231,238,404600,8400,50000,463000,950000,487000,0,950000,Pendiente,Sí,Sí
+V110,2026-11-18,Camioneta,Rodrigo,Buenos Aires,Rosario,1,1,300,300,600,84,85,144500,3600,0,148100,650000,501900,0,650000,Pendiente,No,Pendiente
+V111,2026-11-20,Mosquito 1,Chofer A,Buenos Aires,Rosario,3,3,300,300,600,198,202,343400,7200,25000,375600,1500000,1124400,1500000,0,Pagado,Sí,Sí
+V112,2026-11-21,Mosquito 2,Chofer B,Buenos Aires,Mar del Plata,2,3,400,400,800,264,312,530400,9600,50000,590000,1200000,610000,0,1200000,Pendiente,Sí,Sí
