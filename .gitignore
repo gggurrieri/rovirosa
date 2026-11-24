@@ -13,3 +13,8 @@ build/
 # Sistema
 .DS_Store
 *.log
+
+# Next.js y TypeScript
+next-env.d.ts
+*.tsbuildinfo
+/coverage

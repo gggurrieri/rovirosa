@@ -1,4 +1,71 @@
-# Rovirosa · Kit de inicio (sprint 1)
+# Rovirosa · Sistema de gestión para transporte de autos
+
+App web (Next.js + Supabase) para registrar viajes y cobros, pensada para usar desde el celular.
+
+## Correr la app en local
+
+Necesitás **Node.js 22** (LTS) y el proyecto de Supabase ya creado y cargado (ver "Primeros pasos" más abajo).
+
+1. Instalar dependencias:
+
+   ```bash
+   npm install
+   ```
+
+2. Crear el archivo de variables a partir del ejemplo:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. Completar `.env.local` con la **URL del proyecto** y la **anon key** (Supabase → Project Settings → API). Nunca la service role key.
+
+4. Levantar la app:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Abrir http://localhost:3000 y entrar con tu usuario.
+
+### Probarla desde el celular en la misma red wifi
+
+```bash
+npm run dev -- --hostname 0.0.0.0
+```
+
+Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
+
+### Comandos
+
+| Comando | Qué hace |
+| --- | --- |
+| `npm run dev` | App en modo desarrollo |
+| `npm run build` | Compila para producción |
+| `npm run lint` | Revisa el estilo y errores comunes del código |
+| `npm test` | Corre los tests (formato de plata y fechas, cálculos del tablero) |
+
+### Estructura
+
+| Carpeta | Qué hay |
+| --- | --- |
+| `app/login/` | Pantalla de login y acciones de entrar y salir |
+| `app/(app)/` | Pantallas con sesión: Inicio, Viajes, Cobros, Más |
+| `components/` | Piezas de interfaz reutilizables (barra inferior, tarjetas, montos) |
+| `lib/formato.ts` | Plata en centavos → `$ 1.250.000`, fechas → `23/11/2026` |
+| `lib/tablero.ts` | Cálculos de saldos (funciones puras, con tests) |
+| `lib/datos.ts` | Todas las consultas a Supabase |
+| `lib/supabase/` | Clientes de Supabase y refresco de sesión |
+| `proxy.ts` | Redirige a `/login` si no hay sesión (en Next.js 16 el "middleware" se llama "proxy") |
+
+## Publicar en Netlify
+
+1. En Netlify: **Add new site → Import an existing project** y elegí el repositorio `rovirosa` de GitHub.
+2. Netlify lee `netlify.toml` (comando `npm run build`, Node 22). No hace falta tocar nada más.
+3. En **Site configuration → Environment variables** cargá `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+4. **Deploy**. Abrí la URL que te da Netlify desde el celular.
+
+## Kit de inicio
 
 Todo lo necesario para arrancar el sistema con Claude Code, sin esperar a Rodrigo.
 
