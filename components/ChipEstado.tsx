@@ -1,4 +1,4 @@
-import type { EstadoViaje } from "@/lib/datos";
+import type { EstadoViaje } from "@/lib/viajes";
 
 const ESTADOS: Record<EstadoViaje, { texto: string; clases: string }> = {
   programado: { texto: "Programado", clases: "bg-slate-200 text-slate-800" },
