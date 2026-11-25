@@ -11,11 +11,12 @@ export default async function Inicio() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-bold">Inicio</h1>
-      <TarjetaResumen titulo="Por cobrar" valor={<Montos montos={porCobrar} />} />
+      <TarjetaResumen titulo="Por cobrar" valor={<Montos montos={porCobrar} />} href="/cobros" />
       <TarjetaResumen
         titulo="Vencido"
         valor={<Montos montos={vencido} />}
         tono={hayVencido ? "alerta" : "normal"}
+        href="/cobros"
         detalle={hayVencido ? "Entregados hace más de los días acordados sin cobrar todo" : "Nada vencido"}
       />
       <TarjetaResumen
