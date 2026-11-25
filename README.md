@@ -54,7 +54,9 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `components/` | Piezas de interfaz reutilizables (barra inferior, tarjetas, montos) |
 | `lib/formato.ts` | Plata en centavos → `$ 1.250.000`, fechas → `23/11/2026` |
 | `lib/tablero.ts` | Cálculos de saldos (funciones puras, con tests) |
-| `lib/datos.ts` | Todas las consultas a Supabase |
+| `lib/cobros.ts` | Montos escritos a mano, sugerencia de aplicación de pagos y validaciones (con tests) |
+| `lib/viajes.ts` | Estados del viaje, armado antes de guardar y avisos de disponibilidad (con tests) |
+| `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
 | `proxy.ts` | Redirige a `/login` si no hay sesión (en Next.js 16 el "middleware" se llama "proxy") |
 
@@ -73,6 +75,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | --- | --- |
 | `20261124000000_esquema_fase1.sql` | Tablas, seguridad por empresa, reglas de cobro y auditoría |
 | `20261125000000_cobros.sql` | Registrar y anular pagos, vistas de pagos, vencido en hora argentina, blindaje entre empresas |
+| `20261126000000_viajes.sql` | Cargar viajes (con clientes y autos nuevos), cambiar su estado, blindaje entre empresas en viajes, autos y vehículos |
 
 Para aplicar una (sirve desde el celular):
 
@@ -86,7 +89,10 @@ Para aplicar una (sirve desde el celular):
 En una base vacía, aplicá en este orden: `test/stub_supabase.sql`, las migraciones, `supabase/seed.sql`. Después:
 
 - `test/pruebas_rls.sql`: seguridad por empresa y reglas de cobro de la fase 1.
-- `test/pruebas_cobros.sql`: registrar, pagos duplicados, cobrar de más, saldo a favor, anular y aislamiento entre empresas. Cada caso imprime `OK` o corta con `FALLA`.
+- `test/pruebas_cobros.sql`: registrar, pagos duplicados, cobrar de más, saldo a favor, anular y aislamiento entre empresas.
+- `test/pruebas_viajes.sql`: cargar viajes, duplicados, capacidad, estados, entrega y vencido, deshacer, cancelar y aislamiento entre empresas.
+
+Cada caso imprime `OK` o corta con `FALLA`.
 
 ## Kit de inicio
 

@@ -15,14 +15,8 @@ export type Perfil = {
   empresa: string;
 };
 
-export type EstadoViaje =
-  | "programado"
-  | "en_retiro"
-  | "en_viaje"
-  | "entregado"
-  | "cerrado"
-  | "reprogramado"
-  | "cancelado";
+import type { EstadoViaje } from "./viajes";
+export type { EstadoViaje };
 
 export type Viaje = {
   id: string;
