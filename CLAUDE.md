@@ -9,6 +9,22 @@ Sistema para Rovirosa, una transportista de autos de alto valor (carrera, 0 km, 
 
 Rovirosa es el primer cliente (design partner). El objetivo final es venderlo a otras transportistas, por eso es **multi-empresa desde el día 1**.
 
+## Objetivos de negocio
+
+Todo lo que se construye tiene que servir a los dos objetivos.
+
+**1. Para el producto: una herramienta escalable y comercializable.**
+- **Multi-empresa real**: toda tabla nueva lleva `empresa_id`, RLS y pruebas de aislamiento entre empresas usando ids reales (no buscados con RLS, que los oculta).
+- **Configurable, no a medida**: nada de "lo de Rodrigo" en el código. Tarifas, unidades, reglas y plazos son datos que cada empresa carga.
+- **Calidad automática**: las pruebas viven en el repo y corren solas en cada pull request (GitHub Actions). Un cambio que rompe algo no se une.
+- **Costos que escalan**: hoy planes gratis. Con el primer cliente que pague, Supabase pasa al plan pago (el gratis pausa el proyecto tras 7 días sin uso).
+
+**2. Para el cliente: gestionar simple, bajar costos y subir ganancias.**
+- **Que no se escape plata**: cobros, vencidos, recordatorios. Mostrar cuánto se **recuperó** (métrica norte).
+- **Bajar costos**: gastos y consumo (fase 2).
+- **Ganancia real**: márgenes recién cuando haya gastos cargados; nunca mostrar un número engañoso.
+- **Simple**: cada pantalla se mide en toques y segundos.
+
 ## Problema que resuelve, en orden de prioridad
 
 1. **Viajes que no se cobran**: hoy los pagos no se registran (un cliente avisó solo que debía un viaje de hace mes y medio).
@@ -18,8 +34,8 @@ Rovirosa es el primer cliente (design partner). El objetivo final es venderlo a 
 
 ## Usuarios
 
-- **Rodrigo (dueño)**: poco amigo de la tecnología. Usa el celular. Si cargar algo le lleva más de 30 segundos, deja de usarlo. **La adopción es el riesgo número uno del proyecto.**
-- **Administrativo** (a futuro): carga viajes y cobros.
+- **Rodrigo (dueño)**: poco amigo de la tecnología. Usa el **celular** para consultar resultados y viajes, y para acciones rápidas (comienzo y fin de viaje). La carga la hace el administrativo. Si algo le lleva más de 30 segundos, deja de usarlo. **La adopción es el riesgo número uno del proyecto.**
+- **Administrativo**: gestiona desde la **computadora**: carga y edita viajes, registra cobros con su comprobante, controla con grillas y filtros.
 - **Choferes** (fase 2): solo ven sus viajes, nunca precios ni cobros.
 - **Clientes** (fase 3): link de seguimiento sin login.
 
@@ -33,7 +49,7 @@ Rovirosa es el primer cliente (design partner). El objetivo final es venderlo a 
 
 ## Reglas de la casa (no negociables)
 
-1. **Mobile-first.** Diseñar primero para un celular de 375 px. Botones grandes, pocos campos, nada de tablas anchas sin scroll horizontal.
+1. **Dos puestos de trabajo.** El administrativo gestiona desde la computadora (grillas, filtros, formularios anchos). Rodrigo consulta y hace acciones rápidas desde el celular (resultados, viajes en curso, comienzo y fin de viaje), con botones grandes y pocos toques. Una sola web *responsive*: toda pantalla se prueba a 375 px y a 1280 px. Los permisos van por rol, nunca por dispositivo.
 2. **Todo en español rioplatense** en la interfaz ("cargá", "guardá"). Formato argentino: `$ 1.250.000`, `23/11/2026`. Usar `Intl.NumberFormat('es-AR')` y zona horaria `America/Argentina/Buenos_Aires`.
 3. **La plata en centavos, como enteros** (`bigint` en la base, `number` entero en TS). Nunca floats para plata. Convertir solo al mostrar.
 4. **Multi-empresa**: toda tabla tiene `empresa_id` y Row Level Security. La app nunca filtra por empresa "a mano": lo hace la base. El `empresa_id` se completa solo con `mi_empresa()` por defecto.
