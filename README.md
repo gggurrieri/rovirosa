@@ -76,6 +76,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261124000000_esquema_fase1.sql` | Tablas, seguridad por empresa, reglas de cobro y auditoría |
 | `20261125000000_cobros.sql` | Registrar y anular pagos, vistas de pagos, vencido en hora argentina, blindaje entre empresas |
 | `20261126000000_viajes.sql` | Cargar viajes (con clientes y autos nuevos), cambiar su estado, blindaje entre empresas en viajes, autos y vehículos |
+| `20261127000000_resultados_y_comprobantes.sql` | Resultados del mes (con recuperado), "Empezó el viaje" con un toque, comprobantes en Storage privado por empresa |
 
 Para aplicar una (sirve desde el celular):
 
@@ -84,15 +85,31 @@ Para aplicar una (sirve desde el celular):
 3. Tiene que decir **Success. No rows returned**. Si da error, no sigas: copiá el mensaje y consultalo.
 4. **Primero la migración, después el deploy:** si la app nueva se publica antes de correr la migración, la pantalla Cobros va a fallar porque busca funciones que todavía no existen.
 
-## Pruebas de la base (Postgres local)
+## Pruebas
 
-En una base vacía, aplicá en este orden: `test/stub_supabase.sql`, las migraciones, `supabase/seed.sql`. Después:
+Las pruebas corren **solas en cada pull request** con GitHub Actions (`.github/workflows/pruebas.yml`): el PR muestra ✅ o ❌. Para que GitHub no deje unir un PR con ❌: **Settings → Branches → Add branch protection rule** → `main` → tildar **Require status checks to pass before merging** y elegir **pruebas**.
 
-- `test/pruebas_rls.sql`: seguridad por empresa y reglas de cobro de la fase 1.
-- `test/pruebas_cobros.sql`: registrar, pagos duplicados, cobrar de más, saldo a favor, anular y aislamiento entre empresas.
-- `test/pruebas_viajes.sql`: cargar viajes, duplicados, capacidad, estados, entrega y vencido, deshacer, cancelar y aislamiento entre empresas.
+| Comando | Qué prueba | Necesita |
+| --- | --- | --- |
+| `npm test` | Lógica de plata, fechas, viajes, cobros y comprobantes (Vitest) | Nada |
+| `npm run test:sql` | Migraciones contra Postgres: seguridad por empresa, reglas de cobro, viajes, resultados y Storage | Postgres local |
+| `npm run test:e2e` | La app en un navegador a 375 px, de punta a punta, contra un Supabase simulado | Postgres local y Playwright |
 
-Cada caso imprime `OK` o corta con `FALLA`.
+Las pruebas de Postgres usan las variables estándar (`PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`). Por ejemplo, con un Postgres en Docker:
+
+```bash
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16
+```
+
+```bash
+PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres npm run test:sql
+```
+
+Qué hay en `test/`:
+
+- `stub_supabase.sql` y `stub_storage.sql`: lo mínimo de Supabase (auth y Storage) para correr las migraciones en un Postgres común.
+- `pruebas_*.sql`: cada caso imprime `OK` o corta con `FALLA`. `pruebas_rls.sql` es la versión original de la fase 1, para leer a ojo; `pruebas_fase1.sql` es su versión automática.
+- `e2e/`: el Supabase simulado (aplica las políticas reales de la base), los scripts de cada sprint y los corredores.
 
 ## Kit de inicio
 

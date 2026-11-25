@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:sql": "bash test/sql/correr.sh",
+    "test:e2e": "bash test/e2e/correr.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -25,6 +27,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "pg": "^8.23.1",
+    "playwright": "^1.63.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "^5.1.1"

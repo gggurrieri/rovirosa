@@ -1,0 +1,67 @@
+# Pruebas automáticas: corren en cada pull request y en cada cambio a main.
+# Si algo falla, el PR muestra ❌ y (con la protección de rama activada) no se puede unir.
+name: Pruebas
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests (Vitest)
+        run: npm test
+
+      - name: Build (sin claves, como en Netlify antes de cargarlas)
+        run: npm run build
+
+      - name: Pruebas de la base (SQL)
+        run: npm run test:sql
+
+      - name: Instalar navegador para las pruebas de punta a punta
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas de punta a punta (375 px)
+        run: npm run test:e2e
+        env:
+          CAPTURAS: ${{ runner.temp }}/capturas
+
+      - name: Guardar capturas y registros si algo falló
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capturas-y-registros
+          path: ${{ runner.temp }}/capturas
+          retention-days: 7
