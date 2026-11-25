@@ -6,6 +6,7 @@ set -uo pipefail
 cd "$(dirname "$0")/../.."
 export PGDATABASE=${PGDATABASE:-rovirosa_e2e}
 export CAPTURAS=${CAPTURAS:-$(mktemp -d)}
+mkdir -p "$CAPTURAS" # en la CI viene configurada pero todavía no existe
 PUERTO_APP=3100
 PUERTO_SIMULADO=54321
 
