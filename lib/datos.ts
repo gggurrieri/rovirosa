@@ -34,11 +34,11 @@ export type Viaje = {
   unidad: string | null;
 };
 
-function fallo(que: string, error: { message: string }): never {
+export function fallo(que: string, error: { message: string }): never {
   throw new Error(`No se pudo leer ${que}: ${error.message}`);
 }
 
-function aCentavos(valor: unknown): number {
+export function aCentavos(valor: unknown): number {
   const numero = typeof valor === "string" ? Number(valor) : valor;
   if (typeof numero !== "number" || !Number.isSafeInteger(numero)) {
     throw new Error(`Monto inválido en la base: ${String(valor)}`);

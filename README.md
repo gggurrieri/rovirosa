@@ -65,6 +65,29 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 3. En **Site configuration → Environment variables** cargá `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 4. **Deploy**. Abrí la URL que te da Netlify desde el celular.
 
+## Aplicar una migración nueva en Supabase
+
+Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, y se aplican **en orden** por la fecha del nombre. Nunca se edita una migración que ya corrió.
+
+| Migración | Qué agrega |
+| --- | --- |
+| `20261124000000_esquema_fase1.sql` | Tablas, seguridad por empresa, reglas de cobro y auditoría |
+| `20261125000000_cobros.sql` | Registrar y anular pagos, vistas de pagos, vencido en hora argentina, blindaje entre empresas |
+
+Para aplicar una (sirve desde el celular):
+
+1. Abrí el archivo en GitHub y tocá **Raw**. Copiá todo el texto.
+2. En Supabase: **SQL Editor → New query**, pegá el texto y tocá **Run**.
+3. Tiene que decir **Success. No rows returned**. Si da error, no sigas: copiá el mensaje y consultalo.
+4. **Primero la migración, después el deploy:** si la app nueva se publica antes de correr la migración, la pantalla Cobros va a fallar porque busca funciones que todavía no existen.
+
+## Pruebas de la base (Postgres local)
+
+En una base vacía, aplicá en este orden: `test/stub_supabase.sql`, las migraciones, `supabase/seed.sql`. Después:
+
+- `test/pruebas_rls.sql`: seguridad por empresa y reglas de cobro de la fase 1.
+- `test/pruebas_cobros.sql`: registrar, pagos duplicados, cobrar de más, saldo a favor, anular y aislamiento entre empresas. Cada caso imprime `OK` o corta con `FALLA`.
+
 ## Kit de inicio
 
 Todo lo necesario para arrancar el sistema con Claude Code, sin esperar a Rodrigo.
