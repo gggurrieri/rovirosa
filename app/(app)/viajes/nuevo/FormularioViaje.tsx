@@ -10,6 +10,7 @@ import { crearViaje, type EstadoFormulario } from "../actions";
 type AutoUI = AutoBorrador & { key: number; busqueda: string; modoNuevo: boolean; precioEditado: boolean };
 
 const estadoInicial: EstadoFormulario = { error: null };
+const RUTAS_FRECUENTES = 4;
 const sinSimbolo = (centavos: number, moneda: Moneda) => formatearPlata(centavos, moneda).replace(/^(US)?\$ /, "");
 const normalizar = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -50,6 +51,7 @@ export function FormularioViaje({ id, hoy, opciones }: { id: string; hoy: string
   const [notas, setNotas] = useState("");
   const [autos, setAutos] = useState<AutoUI[]>(() => [autoVacio("")]);
   const [confirmarCero, setConfirmarCero] = useState(false);
+  const [todasLasRutas, setTodasLasRutas] = useState(false);
 
   const tarifa = tarifas.find((t) => t.id === tarifaId) ?? null;
   const unidad = unidades.find((u) => u.id === unidadId) ?? null;
@@ -130,7 +132,7 @@ export function FormularioViaje({ id, hoy, opciones }: { id: string; hoy: string
       <section className="flex flex-col gap-2">
         <h2 className="text-base font-semibold text-slate-700">Ruta</h2>
         <div className="grid grid-cols-1 gap-2">
-          {tarifas.map((t) => (
+          {(todasLasRutas ? tarifas : tarifas.slice(0, RUTAS_FRECUENTES)).map((t) => (
             <button key={t.id} type="button" onClick={() => elegirTarifa(t)} className={chip(tarifaId === t.id)}>
               <span className="flex items-center justify-between gap-2">
                 <span>
@@ -140,6 +142,11 @@ export function FormularioViaje({ id, hoy, opciones }: { id: string; hoy: string
               </span>
             </button>
           ))}
+          {!todasLasRutas && tarifas.length > RUTAS_FRECUENTES && (
+            <button type="button" onClick={() => setTodasLasRutas(true)} className="min-h-12 text-left text-base font-medium text-sky-700">
+              Ver todas las rutas ({tarifas.length})
+            </button>
+          )}
           <button type="button" onClick={elegirOtraRuta} className={chip(otraRuta)}>
             Otra ruta…
           </button>

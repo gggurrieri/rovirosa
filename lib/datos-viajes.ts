@@ -12,6 +12,8 @@ export type Chofer = { id: string; nombre: string };
 export type Vehiculo = { id: string; cliente_id: string; marca: string; modelo: string };
 export type ViajeAgenda = {
   numero: number;
+  origen: string;
+  destino: string;
   unidad_id: string | null;
   chofer_id: string | null;
   fecha_salida: string;
@@ -48,7 +50,7 @@ export async function obtenerOpcionesViaje(): Promise<OpcionesViaje> {
     supabase.from("vehiculos").select("id, cliente_id, marca, modelo").order("marca"),
     supabase
       .from("viajes")
-      .select("numero, unidad_id, chofer_id, fecha_salida, fecha_llegada_estimada, estado")
+      .select("numero, origen, destino, unidad_id, chofer_id, fecha_salida, fecha_llegada_estimada, estado")
       .gte("fecha_salida", desde)
       .neq("estado", "cancelado"),
     supabase.from("bloqueos_disponibilidad").select("unidad_id, chofer_id, desde, hasta, motivo").gte("hasta", desde),
@@ -65,8 +67,18 @@ export async function obtenerOpcionesViaje(): Promise<OpcionesViaje> {
     if (r.error) fallo(que, r.error);
   }
 
+  // Rutas más usadas primero (últimos 60 días): las frecuentes quedan a un toque.
+  const usos = new Map<string, number>();
+  for (const v of agenda.data ?? []) {
+    const clave = `${v.origen}→${v.destino}`;
+    usos.set(clave, (usos.get(clave) ?? 0) + 1);
+  }
+  const usoDe = (t: { origen: string; destino: string }) => usos.get(`${t.origen}→${t.destino}`) ?? 0;
+
   return {
-    tarifas: (tarifas.data ?? []).map((t) => ({ ...t, precio_base_centavos: aCentavos(t.precio_base_centavos) })),
+    tarifas: (tarifas.data ?? [])
+      .map((t) => ({ ...t, precio_base_centavos: aCentavos(t.precio_base_centavos) }))
+      .sort((a, b) => usoDe(b) - usoDe(a)),
     unidades: unidades.data ?? [],
     choferes: choferes.data ?? [],
     clientes: clientes.data ?? [],

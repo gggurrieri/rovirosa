@@ -35,7 +35,7 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
 
       {creado && <Aviso>Viaje #{viaje.numero} guardado.</Aviso>}
       {typeof cambio === "string" && cambio in NOMBRE_ESTADO && (
-        <Aviso>Listo: el viaje quedó {NOMBRE_ESTADO[cambio as keyof typeof NOMBRE_ESTADO].toLowerCase()}.</Aviso>
+        <Aviso>Estado actualizado: {NOMBRE_ESTADO[cambio as keyof typeof NOMBRE_ESTADO]}.</Aviso>
       )}
 
       <section className="rounded-2xl bg-white p-5 shadow-sm">
