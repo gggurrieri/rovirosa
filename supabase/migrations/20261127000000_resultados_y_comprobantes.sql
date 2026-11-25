@@ -108,7 +108,8 @@ begin
     ('programado', 'en_retiro'), ('reprogramado', 'en_retiro'), ('en_retiro', 'en_viaje'),
     ('en_viaje', 'entregado'), ('entregado', 'cerrado'),
     ('programado', 'en_viaje'), ('reprogramado', 'en_viaje'),                 -- "Empezó el viaje"
-    ('en_retiro', 'programado'), ('en_viaje', 'en_retiro'), ('en_viaje', 'programado'),
+    ('en_retiro', 'programado'), ('en_viaje', 'en_retiro'),
+    ('en_viaje', 'programado'), ('en_viaje', 'reprogramado'),                 -- deshacer "Empezó"
     ('entregado', 'en_viaje'), ('cerrado', 'entregado'),
     ('programado', 'cancelado'), ('reprogramado', 'cancelado'), ('en_retiro', 'cancelado')
   ) then
