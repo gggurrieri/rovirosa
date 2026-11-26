@@ -86,9 +86,14 @@ const cobradoDelMes = () =>
   // Criterios 8, 10 y 11: agregar el comprobante después, con archivo; validaciones
   const pagoSinComprobante = c.sql("select id from pagos where comprobante_path is null and anulado_en is null order by fecha desc, id limit 1");
   await page.goto(`${c.APP}/cobros/pagos/${pagoSinComprobante}/adjuntar`);
+  // La pantalla valida el archivo de forma asíncrona (primero intenta achicarlo): el
+  // mensaje aparece un instante después de elegirlo. Hay que esperarlo, no leer al toque.
+  await page.waitForLoadState("networkidle");
   await page.setInputFiles("input[name=comprobante]", { name: "enorme.pdf", mimeType: "application/pdf", buffer: Buffer.alloc(6 * 1024 * 1024, 1) });
+  await page.waitForSelector("text=El comprobante pesa más de 5 MB", { timeout: 5000 }).catch(() => {});
   c.ok((await c.texto(page)).includes("El comprobante pesa más de 5 MB"), "Más de 5 MB: mensaje claro y no se adjunta");
   await page.setInputFiles("input[name=comprobante]", { name: "cosas.zip", mimeType: "application/zip", buffer: Buffer.from("PK") });
+  await page.waitForSelector("text=tiene que ser una imagen (captura o foto) o un PDF", { timeout: 5000 }).catch(() => {});
   c.ok((await c.texto(page)).includes("tiene que ser una imagen (captura o foto) o un PDF"), "Tipo no permitido: mensaje claro");
   await page.setInputFiles("input[name=comprobante]", { name: "transferencia.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%%EOF\n") });
   c.ok((await c.texto(page)).includes("📄 transferencia.pdf"), "Adjuntar un PDF desde archivo lo muestra listo para guardar");
