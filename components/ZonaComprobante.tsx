@@ -89,7 +89,7 @@ export function ZonaComprobante() {
           setArrastrando(false);
           void recibir(e.dataTransfer.files[0]);
         }}
-        className={`flex flex-col items-center gap-3 rounded-xl border-2 border-dashed p-4 text-center ${
+        className={`flex flex-col items-center gap-3 rounded-xl border-2 border-dashed p-4 text-center lg:min-h-64 lg:justify-center ${
           arrastrando ? "border-sky-600 bg-sky-50" : "border-slate-300 bg-white"
         }`}
       >
@@ -97,7 +97,7 @@ export function ZonaComprobante() {
           <>
             {vista ? (
               // eslint-disable-next-line @next/next/no-img-element -- vista previa local (blob:), no pasa por el optimizador
-              <img src={vista} alt="Vista previa del comprobante" className="max-h-64 rounded-lg object-contain" />
+              <img src={vista} alt="Vista previa del comprobante" className="max-h-64 rounded-lg object-contain lg:max-h-[60vh]" />
             ) : (
               <p className="text-base font-medium">📄 {archivo.name}</p>
             )}

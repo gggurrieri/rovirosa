@@ -28,7 +28,7 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
   const tienePagos = viaje.autos.some((a) => a.cobrado_centavos > 0);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 lg:max-w-3xl">
       <Link href="/viajes" className="text-base font-medium text-sky-700">
         ← Viajes
       </Link>

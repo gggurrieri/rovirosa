@@ -96,7 +96,7 @@ export function FormularioPago({
     .slice(0, 8);
 
   return (
-    <form action={accion} className="flex flex-col gap-6">
+    <form action={accion} className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-x-10 lg:gap-y-6">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="cliente_id" value={clienteId ?? ""} />
       <input type="hidden" name="moneda" value={moneda} />
@@ -263,7 +263,10 @@ export function FormularioPago({
       )}
 
       {/* 4. Comprobante: pegar, arrastrar o adjuntar */}
-      <ZonaComprobante />
+      {/* En la computadora, el comprobante va a la derecha y queda fijo al bajar */}
+      <div className="lg:sticky lg:top-8 lg:col-start-2 lg:row-span-6 lg:row-start-1 lg:self-start">
+        <ZonaComprobante />
+      </div>
 
       {/* 5. Detalles (con valores por defecto) */}
       <section className="flex flex-col gap-3">

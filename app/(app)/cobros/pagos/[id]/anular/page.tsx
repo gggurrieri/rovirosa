@@ -16,7 +16,7 @@ export default async function AnularPago({ params }: PageProps<"/cobros/pagos/[i
   if (!pago) notFound();
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 lg:max-w-xl">
       <h1 className="text-2xl font-bold">Anular pago</h1>
 
       <section className="rounded-2xl bg-white p-5 shadow-sm">

@@ -56,6 +56,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/tablero.ts` | Cálculos de saldos (funciones puras, con tests) |
 | `lib/cobros.ts` | Montos escritos a mano, sugerencia de aplicación de pagos y validaciones (con tests) |
 | `lib/viajes.ts` | Estados del viaje, armado antes de guardar y avisos de disponibilidad (con tests) |
+| `lib/grilla.ts` | Filtros de la grilla en la URL, orden y exportación CSV para Excel (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
 | `proxy.ts` | Redirige a `/login` si no hay sesión (en Next.js 16 el "middleware" se llama "proxy") |
@@ -77,6 +78,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261125000000_cobros.sql` | Registrar y anular pagos, vistas de pagos, vencido en hora argentina, blindaje entre empresas |
 | `20261126000000_viajes.sql` | Cargar viajes (con clientes y autos nuevos), cambiar su estado, blindaje entre empresas en viajes, autos y vehículos |
 | `20261127000000_resultados_y_comprobantes.sql` | Resultados del mes (con recuperado), "Empezó el viaje" con un toque, comprobantes en Storage privado por empresa |
+| `20261128000000_grilla_viajes.sql` | Búsqueda de viajes para la grilla (filtros, orden, páginas y totales en la base) |
 
 Para aplicar una (sirve desde el celular):
 
@@ -93,7 +95,7 @@ Las pruebas corren **solas en cada pull request** con GitHub Actions (`.github/w
 | --- | --- | --- |
 | `npm test` | Lógica de plata, fechas, viajes, cobros y comprobantes (Vitest) | Nada |
 | `npm run test:sql` | Migraciones contra Postgres: seguridad por empresa, reglas de cobro, viajes, resultados y Storage | Postgres local |
-| `npm run test:e2e` | La app en un navegador a 375 px, de punta a punta, contra un Supabase simulado | Postgres local y Playwright |
+| `npm run test:e2e` | La app en un navegador a 375 px (celular) y 1280 px (computadora), de punta a punta, contra un Supabase simulado | Postgres local y Playwright |
 
 Las pruebas de Postgres usan las variables estándar (`PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`). Por ejemplo, con un Postgres en Docker:
 
