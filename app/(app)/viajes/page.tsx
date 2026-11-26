@@ -111,7 +111,10 @@ function Tarjetas({ filas }: { filas: FilaGrilla[] }) {
                 {v.origen} → {v.destino}
               </p>
               <div className="mt-2 flex items-end justify-between gap-3">
-                <p className="text-base text-slate-600">{v.unidad ?? "Sin unidad"}</p>
+                <p className="text-base text-slate-600">
+                  {v.unidad ?? "Sin unidad"}
+                  {v.estado === "en_viaje" && v.entregados > 0 && ` · ${v.entregados} de ${v.autos} entregados`}
+                </p>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Saldo</p>
                   <p className={`text-base font-semibold tabular-nums ${debe ? "text-red-700" : "text-emerald-700"}`}>
@@ -193,6 +196,11 @@ function Tabla({ filas, filtros, cliente }: { filas: FilaGrilla[]; filtros: Filt
               </td>
               <td className="px-3 py-3 whitespace-nowrap">
                 <ChipEstado estado={v.estado} />
+                {v.estado === "en_viaje" && v.entregados > 0 && (
+                  <span className="ml-1 text-xs text-slate-600">
+                    {v.entregados}/{v.autos} entregados
+                  </span>
+                )}
               </td>
               <td className={`px-3 py-3 whitespace-nowrap ${COLOR_COBRO[v.cobro]}`}>{NOMBRE_COBRO[v.cobro]}</td>
               <td className="px-3 py-3 text-right whitespace-nowrap tabular-nums">

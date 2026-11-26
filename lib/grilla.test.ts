@@ -95,6 +95,7 @@ describe("aCSV", () => {
     unidad: "Mosquito 2",
     chofer: "Chofer B",
     autos: 2,
+    entregados: 0,
     clientes: "Juan Pérez (ficticio); Colección Ruiz",
     facturado_ars: 120_000_000,
     saldo_ars: 120_000_050,

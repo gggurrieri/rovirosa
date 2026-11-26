@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { BotonAccionRapida } from "@/components/BotonAccionRapida";
+import { BotonRecordar } from "@/components/BotonRecordar";
 import { Montos } from "@/components/Montos";
 import { obtenerItemsSaldo } from "@/lib/datos";
+import { obtenerSaldosClientes } from "@/lib/datos-cobros";
 import { obtenerResultados, obtenerViajesHoy } from "@/lib/datos-hoy";
 import { formatearFecha, hoyEnArgentina } from "@/lib/formato";
 import {
@@ -30,11 +32,17 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
   const mes: Mes = pedido && !esMesFuturo(pedido, hoy) ? pedido : mesDe(hoy);
   const mesTexto = pedido ? mesATexto(mes) : null;
 
-  const [resultados, items, viajes] = await Promise.all([
+  const [resultados, items, viajes, clientes] = await Promise.all([
     obtenerResultados(mes),
     obtenerItemsSaldo(),
     obtenerViajesHoy(hoy),
+    obtenerSaldosClientes(),
   ]);
+  // Para reclamar: los 3 clientes con más plata vencida (en pesos primero).
+  const reclamar = clientes
+    .filter((c) => tieneMonto(c.vencido))
+    .sort((a, b) => (b.vencido.ARS ?? 0) - (a.vencido.ARS ?? 0) || (b.vencido.USD ?? 0) - (a.vencido.USD ?? 0))
+    .slice(0, 3);
   const { porCobrar, vencido } = resumenCobros(items);
   const { atrasados, enCurso, proximos } = clasificarViajesHoy(viajes, hoy);
   const siguiente = mesSiguiente(mes);
@@ -128,6 +136,27 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
             Ver métricas con gráficos →
           </Link>
         </section>
+
+        {reclamar.length > 0 && (
+          <section aria-label="Para reclamar" className="flex flex-col gap-3">
+            <h2 className="text-lg font-semibold">Para reclamar</h2>
+            <ul className="flex flex-col gap-2">
+              {reclamar.map((c) => (
+                <li key={c.cliente_id} className="rounded-2xl border-l-4 border-red-600 bg-white p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <Link href={`/clientes/${c.cliente_id}`} className="min-w-0 text-base font-semibold break-words">
+                      {c.nombre}
+                    </Link>
+                    <p className="shrink-0 text-right text-base font-bold text-red-700 tabular-nums">
+                      <Montos montos={c.vencido} />
+                    </p>
+                  </div>
+                  <BotonRecordar clienteId={c.cliente_id} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
 
       {/* Columna derecha (en la computadora): los viajes del día */}

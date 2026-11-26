@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 BASE=${BASE_PRUEBAS:-rovirosa_pruebas}
-PRUEBAS=(test/pruebas_fase1.sql test/pruebas_cobros.sql test/pruebas_viajes.sql test/pruebas_resultados_comprobantes.sql test/pruebas_grilla.sql test/pruebas_editar_usuarios.sql test/pruebas_entrega_cancelacion.sql test/pruebas_metricas.sql test/pruebas_demo.sql)
+PRUEBAS=(test/pruebas_fase1.sql test/pruebas_cobros.sql test/pruebas_viajes.sql test/pruebas_resultados_comprobantes.sql test/pruebas_grilla.sql test/pruebas_editar_usuarios.sql test/pruebas_entrega_cancelacion.sql test/pruebas_metricas.sql test/pruebas_demo.sql test/pruebas_clientes.sql)
 # MIGRACIONES_DIR permite probar contra otra carpeta (por ejemplo, una versión rota a propósito).
 MIGRACIONES=("${MIGRACIONES_DIR:-supabase/migrations}"/*.sql)
 
