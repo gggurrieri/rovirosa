@@ -8,7 +8,11 @@ import { obtenerViaje } from "@/lib/datos-viajes";
 import { formatearFecha, formatearPlata, hoyEnArgentina } from "@/lib/formato";
 import { formatearMomento, type LineaHistorial } from "@/lib/historial";
 import { NOMBRE_ESTADO } from "@/lib/viajes";
+import { progresoEntrega, totalCobrado } from "@/lib/entregas";
+import { puedeCancelar } from "@/lib/viajes";
 import { AccionesEstado } from "./AccionesEstado";
+import { CancelarViaje } from "./CancelarViaje";
+import { EntregaAuto } from "./EntregaAuto";
 
 export const metadata: Metadata = { title: "Viaje · Rovirosa" };
 
@@ -23,14 +27,17 @@ const COBRO: Record<string, { texto: string; clases: string }> = {
 
 export default async function DetalleViaje({ params, searchParams }: PageProps<"/viajes/[id]">) {
   const { id } = await params;
-  const { creado, estado: cambio, editado } = await searchParams;
+  const { creado, estado: cambio, editado, entregado, entrega_deshecha } = await searchParams;
   if (!ES_UUID.test(id)) notFound();
   const [viaje, { perfil }] = await Promise.all([obtenerViaje(id), obtenerSesion()]);
   if (!viaje) notFound();
   // El historial sale de la auditoría, que solo ve el dueño.
   const historial = perfil?.rol === "dueno" ? await obtenerHistorial(viaje) : null;
 
-  const tienePagos = viaje.autos.some((a) => a.cobrado_centavos > 0);
+  const hoy = hoyEnArgentina();
+  const progreso = progresoEntrega(viaje.autos);
+  const conEntrega = viaje.estado === "en_viaje" || viaje.estado === "entregado";
+  const clientes = [...new Set(viaje.autos.filter((a) => a.estado_cobro !== "cancelado").map((a) => a.cliente_nombre))].join(" y ");
 
   return (
     <div className="flex flex-col gap-5 lg:max-w-3xl">
@@ -44,6 +51,8 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
           Viaje #{viaje.numero} actualizado ({editado} {editado === "1" ? "cambio" : "cambios"}).
         </Aviso>
       )}
+      {entregado && <Aviso>Auto entregado ({progreso.texto}).</Aviso>}
+      {entrega_deshecha && <Aviso>Entrega deshecha.</Aviso>}
       {typeof cambio === "string" && cambio in NOMBRE_ESTADO && (
         <Aviso>Estado actualizado: {NOMBRE_ESTADO[cambio as keyof typeof NOMBRE_ESTADO]}.</Aviso>
       )}
@@ -75,12 +84,18 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
         viajeId={viaje.id}
         estado={viaje.estado}
         salida={viaje.fecha_salida}
-        hoy={hoyEnArgentina()}
-        tienePagos={tienePagos}
+        hoy={hoy}
+        entregaParcial={progreso.entregados > 0}
       />
+      {puedeCancelar(viaje.estado) && (
+        <CancelarViaje viajeId={viaje.id} estado={viaje.estado} cobrado={totalCobrado(viaje.autos)} clientes={clientes} />
+      )}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Autos ({viaje.autos.length})</h2>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-lg font-semibold">Autos ({viaje.autos.length})</h2>
+          {conEntrega && <p className="text-sm font-medium text-slate-600">{progreso.texto}</p>}
+        </div>
         <ul className="flex flex-col gap-3">
           {viaje.autos.map((a) => {
             const cobro = a.vencido ? { texto: "Vencido", clases: "text-red-700 font-semibold" } : COBRO[a.estado_cobro];
@@ -107,7 +122,24 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
                     <dd className="font-semibold tabular-nums">{formatearPlata(Math.max(a.saldo_centavos, 0), a.moneda)}</dd>
                   </div>
                 </dl>
-                {a.fecha_entrega && <p className="mt-2 text-sm text-slate-500">Entregado el {formatearFecha(a.fecha_entrega)}</p>}
+                {a.estado_cobro === "cancelado" && a.cobrado_centavos > 0 && (
+                  <p className="mt-2 text-sm font-medium text-slate-700">Seña retenida: {formatearPlata(a.cobrado_centavos, a.moneda)}</p>
+                )}
+                {a.estado_cobro !== "cancelado" &&
+                  (conEntrega ? (
+                    <EntregaAuto
+                      viajeId={viaje.id}
+                      itemId={a.item_id}
+                      nombre={a.vehiculo ?? "auto"}
+                      fechaEntrega={a.fecha_entrega}
+                      salida={viaje.fecha_salida}
+                      hoy={hoy}
+                      puedeEntregar={viaje.estado === "en_viaje"}
+                      puedeDeshacer
+                    />
+                  ) : (
+                    a.fecha_entrega && <p className="mt-2 text-sm text-slate-500">Entregado el {formatearFecha(a.fecha_entrega)}</p>
+                  ))}
                 {a.saldo_centavos > 0 && a.estado_cobro !== "cancelado" && (
                   <Link href={`/cobros/nuevo?cliente=${a.cliente_id}`} className="mt-2 inline-block py-1 text-sm font-medium text-sky-700">
                     Registrar pago →

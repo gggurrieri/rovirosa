@@ -15,7 +15,7 @@ export type ItemPendienteDetalle = ItemPendiente & {
   vehiculo: string | null;
 };
 
-export type AplicacionDetalle = { viaje_numero: number; cliente_nombre: string; monto_centavos: number };
+export type AplicacionDetalle = { viaje_numero: number; cliente_nombre: string; monto_centavos: number; desaplicado: boolean };
 
 export type Pago = {
   id: string;
@@ -130,7 +130,7 @@ async function conAplicaciones(filas: FilaPago[]): Promise<Pago[]> {
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase
     .from("v_aplicaciones")
-    .select("pago_id, viaje_numero, cliente_nombre, monto_centavos")
+    .select("pago_id, viaje_numero, cliente_nombre, monto_centavos, desaplicado_en")
     .in("pago_id", filas.map((f) => f.id))
     .order("viaje_numero");
   if (error) fallo("las aplicaciones de los pagos", error);
@@ -142,6 +142,7 @@ async function conAplicaciones(filas: FilaPago[]): Promise<Pago[]> {
       viaje_numero: Number(a.viaje_numero),
       cliente_nombre: a.cliente_nombre,
       monto_centavos: aCentavos(a.monto_centavos),
+      desaplicado: a.desaplicado_en !== null,
     });
     porPago.set(a.pago_id, lista);
   }
@@ -151,5 +152,24 @@ async function conAplicaciones(filas: FilaPago[]): Promise<Pago[]> {
     monto_centavos: aCentavos(f.monto_centavos),
     a_favor_centavos: aCentavos(f.a_favor_centavos),
     aplicaciones: porPago.get(f.id) ?? [],
+  }));
+}
+
+export type PagoConSaldo = { id: string; fecha: string; moneda: Moneda; a_favor_centavos: number; monto_centavos: number };
+
+/** Pagos de un cliente que todavía tienen plata a favor (sin aplicar). */
+export async function obtenerPagosConSaldo(clienteId: string): Promise<PagoConSaldo[]> {
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase
+    .from("v_pagos")
+    .select("id, fecha, moneda, a_favor_centavos, monto_centavos")
+    .eq("cliente_id", clienteId)
+    .gt("a_favor_centavos", 0)
+    .order("fecha");
+  if (error) fallo("los saldos a favor", error);
+  return (data ?? []).map((p) => ({
+    ...p,
+    a_favor_centavos: aCentavos(p.a_favor_centavos),
+    monto_centavos: aCentavos(p.monto_centavos),
   }));
 }

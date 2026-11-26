@@ -45,7 +45,7 @@ const fecha = (iso) => iso.split("-").reverse().join("/");
   await page.fill("input[aria-label^='Precio del Audi']", "500.000");
   const t3 = await c.texto(page);
   c.ok(t3.includes("Ya se cobraron $ 600.000 del Audi R8") && (await guardar().isDisabled()), "Bajar el precio por debajo de lo cobrado avisa y no deja guardar");
-  c.ok((await page.locator("button:has-text('Quitar')").count()) === 1 && t3.includes("Tiene pagos"), "Solo se puede quitar el auto sin pagos");
+  c.ok((await page.locator("button:has-text('Quitar')").count()) === 2 && t3.includes("Cobrado $ 600.000"), "Los dos autos se pueden quitar; el que tiene pagos muestra lo cobrado");
 
   // Criterio 5: dos pestañas editando el mismo viaje
   const otraPestana = await c.nuevaPagina(navegador, { ancho: 1280 });

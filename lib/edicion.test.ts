@@ -77,10 +77,19 @@ describe("armarCambios", () => {
     });
   });
 
-  it("no quita un auto con pagos ni deja el viaje sin autos", () => {
+  it("quitar un auto con pagos pide elegir seña o a favor, y motivo", () => {
+    expect(armarCambios(original, con({ quitar: ["i1"], anticipos: { i1: "sena" } }))).toEqual({
+      ok: false,
+      error: "Escribí el motivo de la cancelación.",
+    });
+    const r = armarCambios(original, con({ quitar: ["i1"], anticipos: { i1: "a_favor" }, motivo: "No viaja" }));
+    expect(r.ok && r.cambios).toEqual({ quitar: [{ item_id: "i1", anticipo: "a_favor" }], motivo: "No viaja" });
+  });
+
+  it("no quita un auto con pagos sin elegir, ni deja el viaje sin autos", () => {
     expect(armarCambios(original, con({ quitar: ["i1"] }))).toEqual({
       ok: false,
-      error: "El Audi R8 (Juan) tiene pagos: no se puede quitar.",
+      error: "El Audi R8 (Juan) tiene pagos: elegí si lo cobrado queda como seña o a favor del cliente.",
     });
     const sinPagos = { ...original, autos: [original.autos[1]] };
     expect(armarCambios(sinPagos, con({ quitar: ["i2"] }, sinPagos))).toEqual({ ok: false, error: "El viaje tiene que tener al menos un auto." });

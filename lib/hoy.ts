@@ -14,6 +14,8 @@ export type ViajeHoy = {
   unidad: string | null;
   chofer: string | null;
   autos: number;
+  /** Autos ya entregados (entrega por auto). */
+  entregados: number;
 };
 
 const SIN_SALIR: EstadoViaje[] = ["programado", "reprogramado"];

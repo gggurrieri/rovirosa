@@ -14,7 +14,7 @@ const tieneMonto = (m: Record<string, number | undefined>) =>
   Object.values(m).some((v) => (v ?? 0) > 0);
 
 export default async function Cobros({ searchParams }: PageProps<"/cobros">) {
-  const { registrado, anulado, comprobante } = await searchParams;
+  const { registrado, anulado, comprobante, usado } = await searchParams;
   const [clientes, pagos] = await Promise.all([
     obtenerSaldosClientes(),
     obtenerUltimosPagos(),
@@ -31,6 +31,7 @@ export default async function Cobros({ searchParams }: PageProps<"/cobros">) {
         <Aviso>Pago anulado. Los saldos volvieron a como estaban.</Aviso>
       )}
       {comprobante && <Aviso>Comprobante agregado al pago.</Aviso>}
+      {usado && <Aviso>Saldo a favor aplicado. Los saldos ya están actualizados.</Aviso>}
 
       <Link
         href="/cobros/nuevo"
@@ -82,6 +83,14 @@ export default async function Cobros({ searchParams }: PageProps<"/cobros">) {
                         Registrar pago →
                       </p>
                     </Link>
+                    {tieneMonto(c.aFavor) && (
+                      <Link
+                        href={`/cobros/usar?cliente=${c.cliente_id}`}
+                        className="mt-1 flex min-h-11 items-center justify-end px-2 text-sm font-medium text-amber-800"
+                      >
+                        Usar saldo a favor →
+                      </Link>
+                    )}
                   </li>
                 );
               })}
@@ -133,7 +142,7 @@ function TarjetaPago({ pago }: { pago: Pago }) {
           {pago.aplicaciones
             .map(
               (a) =>
-                `#${a.viaje_numero}: ${formatearPlata(a.monto_centavos, pago.moneda)}`,
+                `#${a.viaje_numero}: ${formatearPlata(a.monto_centavos, pago.moneda)}${a.desaplicado ? " (desaplicado: queda a favor)" : ""}`,
             )
             .join(" · ")}
         </p>

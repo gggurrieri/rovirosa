@@ -66,11 +66,10 @@ describe("estados del viaje", () => {
   });
 
   it("solo cancela viajes sin pagos que todavía no salieron", () => {
-    expect(puedeCancelar("programado", false)).toBe(true);
-    expect(puedeCancelar("en_retiro", false)).toBe(true);
-    expect(puedeCancelar("programado", true)).toBe(false);
-    expect(puedeCancelar("en_viaje", false)).toBe(false);
-    expect(puedeCancelar("cancelado", false)).toBe(false);
+    expect(puedeCancelar("programado")).toBe(true);
+    expect(puedeCancelar("en_retiro")).toBe(true);
+    expect(puedeCancelar("en_viaje")).toBe(false);
+    expect(puedeCancelar("cancelado")).toBe(false);
   });
 });
 

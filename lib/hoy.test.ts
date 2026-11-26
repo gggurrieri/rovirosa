@@ -22,6 +22,7 @@ const viaje = (numero: number, estado: ViajeHoy["estado"], fecha_salida: string)
   unidad: "Mosquito 1",
   chofer: "Chofer A",
   autos: 1,
+  entregados: 0,
 });
 
 describe("clasificarViajesHoy", () => {

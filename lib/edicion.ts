@@ -2,6 +2,7 @@
 // los cambios para la base. Funciones puras; la base vuelve a validar todo
 // (editar_viaje y sus triggers), estas reglas son para avisar antes de guardar.
 
+import type { Anticipo } from "./entregas";
 import { formatearPlata, type Moneda } from "./formato";
 import { type AutoBorrador, armarItem, type EstadoViaje, type ItemNuevo, parsearPrecio, validarCapacidad } from "./viajes";
 
@@ -72,6 +73,8 @@ export type EdicionBorrador = {
   /** Precio escrito por item_id, como lo tipeó la persona. */
   precios: Record<string, string>;
   quitar: string[];
+  /** Qué pasa con lo cobrado de cada auto con pagos que se quita. */
+  anticipos?: Record<string, Anticipo>;
   agregar: AutoBorrador[];
   motivo: string;
   /** De la unidad elegida. */
@@ -82,7 +85,8 @@ export type EdicionBorrador = {
 export type CambiosViaje = {
   viaje?: Partial<Record<CampoViaje, string | null>>;
   precios?: { item_id: string; precio_centavos: number }[];
-  quitar?: string[];
+  /** El id del auto, o { item_id, anticipo } si tiene pagos. */
+  quitar?: (string | { item_id: string; anticipo: Anticipo })[];
   agregar?: ItemNuevo[];
   motivo?: string;
 };
@@ -181,10 +185,18 @@ export function armarCambios(o: ViajeOriginal, b: EdicionBorrador): CambiosArmad
   if ((b.quitar.length > 0 || b.agregar.length > 0) && !puedeCambiarAutos(o.estado)) {
     return falla("Solo se agregan o quitan autos antes de que salga el viaje.");
   }
+  const quitar: NonNullable<CambiosViaje["quitar"]> = [];
   for (const id of b.quitar) {
     const auto = o.autos.find((a) => a.item_id === id);
     if (!auto) return falla("El auto no es de este viaje.");
-    if (auto.cobrado_centavos > 0) return falla(`El ${auto.nombre} tiene pagos: no se puede quitar.`);
+    if (auto.cobrado_centavos > 0) {
+      const anticipo = b.anticipos?.[id];
+      if (!anticipo) return falla(`El ${auto.nombre} tiene pagos: elegí si lo cobrado queda como seña o a favor del cliente.`);
+      if (b.motivo.trim() === "") return falla("Escribí el motivo de la cancelación.");
+      quitar.push({ item_id: id, anticipo });
+    } else {
+      quitar.push(id);
+    }
   }
   const agregar: ItemNuevo[] = [];
   for (const [i, a] of b.agregar.entries()) {
@@ -199,9 +211,9 @@ export function armarCambios(o: ViajeOriginal, b: EdicionBorrador): CambiosArmad
     const error = validarCapacidad(activos, b.capacidad, b.unidad_nombre);
     if (error) return falla(error);
   }
-  if (b.quitar.length > 0) {
-    cambios.quitar = [...b.quitar];
-    cantidad += b.quitar.length;
+  if (quitar.length > 0) {
+    cambios.quitar = quitar;
+    cantidad += quitar.length;
   }
   if (agregar.length > 0) {
     cambios.agregar = agregar;

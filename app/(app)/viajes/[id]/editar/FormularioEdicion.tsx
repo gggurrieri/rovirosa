@@ -13,6 +13,7 @@ import {
   puedeCambiarPrecios,
   type ViajeOriginal,
 } from "@/lib/edicion";
+import { type Anticipo, textoAnticipo } from "@/lib/entregas";
 import { formatearPlata } from "@/lib/formato";
 import { avisosDisponibilidad } from "@/lib/viajes";
 import { editarViaje, type EstadoFormulario } from "../../actions";
@@ -64,6 +65,7 @@ export function FormularioEdicion({
   const [notas, setNotas] = useState(inicial.notas);
   const [precios, setPrecios] = useState(inicial.precios);
   const [quitar, setQuitar] = useState<string[]>([]);
+  const [anticipos, setAnticipos] = useState<Record<string, Anticipo>>({});
   const [agregar, setAgregar] = useState<AutoUI[]>([]);
   const [motivo, setMotivo] = useState("");
   const [confirmarCero, setConfirmarCero] = useState(false);
@@ -80,6 +82,7 @@ export function FormularioEdicion({
     notas,
     precios,
     quitar,
+    anticipos,
     agregar: agregar.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio }) => ({
       cliente_id,
       cliente_nuevo,
@@ -98,7 +101,8 @@ export function FormularioEdicion({
   // Se mira el texto tipeado, no el resultado de armarCambios: si falta el motivo,
   // armarCambios da error y el campo para escribirlo tiene que aparecer igual.
   const cambioPrecio = Object.entries(precios).some(([id, texto]) => texto.trim() !== inicial.precios[id]);
-  const pideMotivo = precioPideMotivo(original.estado);
+  const quitaConPagos = original.autos.some((a) => quitar.includes(a.item_id) && a.cobrado_centavos > 0);
+  const pideMotivo = (precioPideMotivo(original.estado) && cambioPrecio) || quitaConPagos;
   const cambiaAgenda = fechaSalida !== inicial.fecha_salida || fechaLlegada !== inicial.fecha_llegada || unidadId !== inicial.unidad_id || choferId !== inicial.chofer_id;
   const avisos =
     unidadId && cambiaAgenda
@@ -206,16 +210,38 @@ export function FormularioEdicion({
                     <button type="button" onClick={() => setQuitar((l) => l.filter((x) => x !== a.item_id))} className="shrink-0 text-sm font-medium text-sky-700">
                       Deshacer
                     </button>
-                  ) : a.cobrado_centavos === 0 ? (
+                  ) : (
                     <button type="button" onClick={() => setQuitar((l) => [...l, a.item_id])} className="shrink-0 text-sm font-medium text-red-700">
                       Quitar
                     </button>
-                  ) : (
-                    <span className="shrink-0 text-xs text-slate-500">Tiene pagos</span>
                   ))}
               </div>
               {seQuita ? (
-                <p className="text-sm font-medium text-red-700">Se quita al guardar.</p>
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-red-700">Se quita al guardar.</p>
+                  {a.cobrado_centavos > 0 && (
+                    <fieldset className="flex flex-col gap-2">
+                      <legend className="mb-1 text-sm font-medium text-slate-700">Ya se cobró {formatearPlata(a.cobrado_centavos, a.moneda)}. ¿Qué pasa con esa plata?</legend>
+                      {(["sena", "a_favor"] as const).map((opcion) => (
+                        <label key={opcion} className="flex min-h-12 cursor-pointer items-start gap-3 rounded-xl border border-slate-300 px-3 py-2 has-[:checked]:border-sky-700 has-[:checked]:bg-sky-50">
+                          <input
+                            type="radio"
+                            name={`anticipo-${a.item_id}`}
+                            checked={anticipos[a.item_id] === opcion}
+                            onChange={() => setAnticipos((x) => ({ ...x, [a.item_id]: opcion }))}
+                            className="mt-1 h-5 w-5 accent-sky-700"
+                          />
+                          <span className="flex flex-col">
+                            <span className="text-base font-medium">{opcion === "sena" ? "Queda como seña" : "Queda a favor del cliente"}</span>
+                            <span className="text-sm text-slate-600">
+                              {textoAnticipo(opcion, { [a.moneda]: a.cobrado_centavos }, a.nombre.replace(/^.*\((.*)\)$/, "$1"))}
+                            </span>
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  )}
+                </div>
               ) : (
                 <label className="flex items-center justify-between gap-3">
                   <span className="shrink-0 text-base text-slate-700">Precio ({a.moneda === "ARS" ? "$" : "US$"})</span>
@@ -262,7 +288,7 @@ export function FormularioEdicion({
         <textarea name="notas" value={notas} onChange={(e) => setNotas(e.target.value)} maxLength={1000} rows={3} className="rounded-lg border border-slate-300 px-3 py-2 text-base" />
       </label>
 
-      {(cambioPrecio || motivo !== "") && (
+      {(cambioPrecio || quitaConPagos || motivo !== "") && (
         <label className="flex flex-col gap-1">
           <span className="text-sm text-slate-600">
             Motivo del cambio {pideMotivo ? "(obligatorio)" : "(opcional)"}

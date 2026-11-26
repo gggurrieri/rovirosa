@@ -59,6 +59,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/grilla.ts` | Filtros de la grilla en la URL, orden y exportación CSV para Excel (con tests) |
 | `lib/edicion.ts` | Qué se puede editar de un viaje según su estado y armado de los cambios (con tests) |
 | `lib/historial.ts` | Historial de cambios de un viaje en frases, desde la auditoría (con tests) |
+| `lib/entregas.ts` | Avance de entregas por auto, fecha de entrega y textos de cancelar con anticipo (con tests) |
 | `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
@@ -83,6 +84,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261127000000_resultados_y_comprobantes.sql` | Resultados del mes (con recuperado), "Empezó el viaje" con un toque, comprobantes en Storage privado por empresa |
 | `20261128000000_grilla_viajes.sql` | Búsqueda de viajes para la grilla (filtros, orden, páginas y totales en la base) |
 | `20261129000000_editar_viaje_y_usuarios.sql` | Editar viajes (reglas por estado, precio nunca menor a lo cobrado, bloqueo optimista, auditoría con motivo) e invitaciones de usuarios |
+| `20261130000000_entrega_y_cancelacion.sql` | Entrega por auto, cancelar con anticipo (seña o a favor del cliente, desaplicando pagos sin borrarlos) y usar el saldo a favor en otros viajes |
 
 Para aplicar una (sirve desde el celular):
 
