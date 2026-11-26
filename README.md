@@ -60,6 +60,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/edicion.ts` | Qué se puede editar de un viaje según su estado y armado de los cambios (con tests) |
 | `lib/historial.ts` | Historial de cambios de un viaje en frases, desde la auditoría (con tests) |
 | `lib/entregas.ts` | Avance de entregas por auto, fecha de entrega y textos de cancelar con anticipo (con tests) |
+| `lib/metricas.ts`, `components/graficos/` | Escalas, montos cortos y gráficos de la pantalla Métricas (HTML y SVG propios, sin librerías) |
 | `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
@@ -85,6 +86,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261128000000_grilla_viajes.sql` | Búsqueda de viajes para la grilla (filtros, orden, páginas y totales en la base) |
 | `20261129000000_editar_viaje_y_usuarios.sql` | Editar viajes (reglas por estado, precio nunca menor a lo cobrado, bloqueo optimista, auditoría con motivo) e invitaciones de usuarios |
 | `20261130000000_entrega_y_cancelacion.sql` | Entrega por auto, cancelar con anticipo (seña o a favor del cliente, desaplicando pagos sin borrarlos) y usar el saldo a favor en otros viajes |
+| `20261201000000_metricas.sql` | Métricas de cobranza para los gráficos (por mes, antigüedad de la deuda, días de cobro, quién debe más) |
 
 Para aplicar una (sirve desde el celular):
 
@@ -103,6 +105,10 @@ Para que funcione, una sola vez en Supabase:
 2. **Authentication → URL Configuration**: en **Site URL** poner la dirección de la app (por ejemplo `https://rovirosa-demo.netlify.app`) y agregar `https://rovirosa-demo.netlify.app/**` en **Redirect URLs**.
 
 El envío de mails del plan gratis de Supabase tiene un límite bajo (unos pocos por hora): alcanza para sumar de a una persona.
+
+## Historia de demo para Métricas (opcional)
+
+`supabase/demo/historia_6_meses.sql` carga 5 meses de viajes y cobros **ficticios** en la empresa "Rovirosa (demo)", para mostrar cómo se ven los gráficos con uso real. No es una migración: se corre a mano en el SQL Editor (una vez; si se corre de nuevo, no duplica). Todo queda marcado con la nota "Historia de demo". Cuando Rovirosa empiece a cargar datos reales, conviene hacerlo en una empresa nueva, sin datos de prueba.
 
 ## Pruebas
 
