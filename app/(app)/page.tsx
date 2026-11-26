@@ -235,7 +235,9 @@ function ListaViajes({
                   {[
                     v.unidad,
                     v.chofer,
-                    `${v.autos} ${v.autos === 1 ? "auto" : "autos"}`,
+                    v.entregados > 0
+                      ? `${v.entregados} de ${v.autos} ${v.autos === 1 ? "entregado" : "entregados"}`
+                      : `${v.autos} ${v.autos === 1 ? "auto" : "autos"}`,
                   ]
                     .filter(Boolean)
                     .join(" · ")}

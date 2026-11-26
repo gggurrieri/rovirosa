@@ -53,9 +53,9 @@ export function textoAvanzar(estado: EstadoViaje): string | null {
   return siguiente ? (TEXTO_AVANZAR[siguiente] ?? null) : null;
 }
 
-/** Se cancela solo un viaje que no salió y no tiene pagos (con anticipo: sprint 4). */
-export function puedeCancelar(estado: EstadoViaje, tienePagos: boolean) {
-  return !tienePagos && (estado === "programado" || estado === "reprogramado" || estado === "en_retiro");
+/** Se cancela solo un viaje que todavía no salió. Con pagos, se elige seña o a favor. */
+export function puedeCancelar(estado: EstadoViaje) {
+  return estado === "programado" || estado === "reprogramado" || estado === "en_retiro";
 }
 
 export function validarCapacidad(cantidad: number, capacidad: number, unidad: string): string | null {

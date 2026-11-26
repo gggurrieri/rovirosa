@@ -42,12 +42,15 @@ export async function obtenerViajesHoy(hoy: string): Promise<ViajeHoy[]> {
 
   const { data: items, error: errorItems } = await supabase
     .from("v_items_saldo")
-    .select("viaje_id, estado_cobro")
+    .select("viaje_id, estado_cobro, fecha_entrega")
     .in("viaje_id", viajes.map((v) => v.id));
   if (errorItems) fallo("los autos de los viajes", errorItems);
   const autos = new Map<string, number>();
+  const entregados = new Map<string, number>();
   for (const i of items ?? []) {
-    if (i.estado_cobro !== "cancelado") autos.set(i.viaje_id, (autos.get(i.viaje_id) ?? 0) + 1);
+    if (i.estado_cobro === "cancelado") continue;
+    autos.set(i.viaje_id, (autos.get(i.viaje_id) ?? 0) + 1);
+    if (i.fecha_entrega) entregados.set(i.viaje_id, (entregados.get(i.viaje_id) ?? 0) + 1);
   }
 
   return viajes.map((v) => ({
@@ -60,5 +63,6 @@ export async function obtenerViajesHoy(hoy: string): Promise<ViajeHoy[]> {
     unidad: (v.unidades as unknown as { nombre: string } | null)?.nombre ?? null,
     chofer: (v.choferes as unknown as { nombre: string } | null)?.nombre ?? null,
     autos: autos.get(v.id) ?? 0,
+    entregados: entregados.get(v.id) ?? 0,
   }));
 }

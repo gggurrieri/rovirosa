@@ -127,7 +127,7 @@ const c = require("./comun.cjs");
   await Promise.all([page.waitForURL(/estado=cancelado/), page.click("text=Sí, cancelar")]);
   c.ok(c.porCobrar() === antesCancelar - 50_000_000 && (await c.texto(page)).includes("Cancelado"), "Cancelar saca el viaje de lo por cobrar");
   await page.goto(`${c.APP}/viajes/${c.sql("select id from viajes where numero = 1")}`);
-  c.ok(!(await c.texto(page)).includes("Cancelar viaje"), "Un viaje con pagos no ofrece cancelar");
+  c.ok(!(await c.texto(page)).includes("Cancelar viaje"), "Un viaje ya entregado no ofrece cancelar");
   c.ok(page.errores.length === 0, `Sin errores de JavaScript ${page.errores.join(" ")}`);
 
   // Otra empresa

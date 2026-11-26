@@ -135,6 +135,7 @@ const datosEdicion = z.object({
   notas: z.string().max(1000),
   precios: z.record(z.guid(), z.string().max(40)),
   quitar: z.array(z.guid()).max(20),
+  anticipos: z.record(z.guid(), z.enum(["sena", "a_favor"])).optional(),
   agregar: z.array(auto).max(20),
   motivo: z.string().max(300),
 });
@@ -186,4 +187,61 @@ export async function editarViaje(_anterior: EstadoFormulario, formData: FormDat
     return { error: mensajeDeBase(error) };
   }
   redirect(`/viajes/${d.viaje_id}?editado=${armado.cantidad}`);
+}
+
+const datosCancelar = z.object({
+  viaje_id: z.guid(),
+  desde: z.string().max(20),
+  anticipo: z.enum(["sena", "a_favor"]).nullable(),
+  motivo: z.string().max(300),
+});
+
+export async function cancelarViaje(_anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const validacion = datosCancelar.safeParse({
+    viaje_id: formData.get("viaje_id"),
+    desde: formData.get("desde"),
+    anticipo: formData.get("anticipo") || null,
+    motivo: String(formData.get("motivo") ?? ""),
+  });
+  if (!validacion.success) return { error: "Revisá los datos y probá de nuevo." };
+  const d = validacion.data;
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.rpc("cancelar_viaje", {
+    p_viaje_id: d.viaje_id,
+    p_desde: d.desde,
+    p_anticipo: d.anticipo,
+    p_motivo: d.motivo.trim() || null,
+  });
+  if (error) return { error: mensajeDeBase(error) };
+  redirect(`/viajes/${d.viaje_id}?estado=cancelado`);
+}
+
+const datosEntrega = z.object({
+  viaje_id: z.guid(),
+  item_id: z.guid(),
+  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+});
+
+export async function entregarAuto(_anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const validacion = datosEntrega.safeParse({
+    viaje_id: formData.get("viaje_id"),
+    item_id: formData.get("item_id"),
+    fecha: formData.get("fecha") || null,
+  });
+  if (!validacion.success) return { error: "Revisá la fecha de entrega." };
+  const d = validacion.data;
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase.rpc("entregar_auto", { p_item_id: d.item_id, p_fecha: d.fecha });
+  if (error) return { error: mensajeDeBase(error) };
+  redirect(`/viajes/${d.viaje_id}?${data === "entregado" ? "estado=entregado" : "entregado=1"}`);
+}
+
+export async function deshacerEntrega(_anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const validacion = datosEntrega.safeParse({ viaje_id: formData.get("viaje_id"), item_id: formData.get("item_id"), fecha: null });
+  if (!validacion.success) return { error: "No se encontró el auto." };
+  const d = validacion.data;
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.rpc("deshacer_entrega", { p_item_id: d.item_id });
+  if (error) return { error: mensajeDeBase(error) };
+  redirect(`/viajes/${d.viaje_id}?entrega_deshecha=1`);
 }

@@ -97,7 +97,7 @@ end $$;
 
 do $$ begin
   perform pg_temp.espera_error(format($q$select pg_temp.ed('{"quitar":["%s"]}')$q$, (select audi from it)),
-    'El auto tiene pagos aplicados', '4');
+    'El auto tiene pagos: elegí si lo cobrado queda como seña o a favor del cliente', '4');
   perform pg_temp.ed(jsonb_build_object('quitar', jsonb_build_array((select bmw from it)),
     'agregar', jsonb_build_array(jsonb_build_object('cliente_id', (select maria from r),
       'vehiculo', jsonb_build_object('marca', 'Ferrari', 'modelo', 'Roma'), 'precio_centavos', 120000000))));
