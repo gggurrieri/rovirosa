@@ -131,6 +131,7 @@ export type FilaGrilla = {
   unidad: string | null;
   chofer: string | null;
   autos: number;
+  entregados: number;
   clientes: string | null;
   facturado_ars: number;
   saldo_ars: number;

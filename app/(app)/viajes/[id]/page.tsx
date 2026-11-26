@@ -103,7 +103,9 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
               <li key={a.item_id} className="rounded-2xl bg-white p-4 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-base font-semibold break-words">{a.cliente_nombre}</p>
+                    <Link href={`/clientes/${a.cliente_id}`} className="text-base font-semibold break-words text-slate-900 underline decoration-slate-300 underline-offset-4">
+                      {a.cliente_nombre}
+                    </Link>
                     <p className="text-sm text-slate-500">{a.vehiculo ?? "Auto sin datos"}</p>
                   </div>
                   <p className={`shrink-0 text-sm ${cobro?.clases ?? ""}`}>{cobro?.texto}</p>

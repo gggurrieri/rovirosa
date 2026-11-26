@@ -35,6 +35,7 @@ export async function buscarViajes(filtros: FiltrosViajes, porPagina: number): P
       unidad: (f.unidad as string | null) ?? null,
       chofer: (f.chofer as string | null) ?? null,
       autos: Number(f.autos),
+      entregados: Number(f.entregados ?? 0),
       clientes: (f.clientes as string | null) ?? null,
       facturado_ars: aCentavos(f.facturado_ars),
       saldo_ars: aCentavos(f.saldo_ars),

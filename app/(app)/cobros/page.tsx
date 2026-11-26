@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BotonRecordar } from "@/components/BotonRecordar";
 import { Montos } from "@/components/Montos";
 import {
   obtenerSaldosClientes,
@@ -83,14 +84,19 @@ export default async function Cobros({ searchParams }: PageProps<"/cobros">) {
                         Registrar pago →
                       </p>
                     </Link>
-                    {tieneMonto(c.aFavor) && (
-                      <Link
-                        href={`/cobros/usar?cliente=${c.cliente_id}`}
-                        className="mt-1 flex min-h-11 items-center justify-end px-2 text-sm font-medium text-amber-800"
-                      >
-                        Usar saldo a favor →
-                      </Link>
-                    )}
+                    <div className="mt-1 flex flex-wrap items-start justify-between gap-x-3">
+                      <BotonRecordar clienteId={c.cliente_id} />
+                      <div className="flex items-center gap-3">
+                        {tieneMonto(c.aFavor) && (
+                          <Link href={`/cobros/usar?cliente=${c.cliente_id}`} className="flex min-h-11 items-center px-2 text-sm font-medium text-amber-800">
+                            Usar saldo a favor →
+                          </Link>
+                        )}
+                        <Link href={`/clientes/${c.cliente_id}`} className="flex min-h-11 items-center px-2 text-sm font-medium text-sky-700">
+                          Ficha →
+                        </Link>
+                      </div>
+                    </div>
                   </li>
                 );
               })}

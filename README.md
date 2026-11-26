@@ -61,6 +61,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/historial.ts` | Historial de cambios de un viaje en frases, desde la auditoría (con tests) |
 | `lib/entregas.ts` | Avance de entregas por auto, fecha de entrega y textos de cancelar con anticipo (con tests) |
 | `lib/metricas.ts`, `components/graficos/` | Escalas, montos cortos y gráficos de la pantalla Métricas (HTML y SVG propios, sin librerías) |
+| `lib/recordatorio.ts` | Mensaje de recordatorio de cobro, número de WhatsApp en formato internacional y posibles clientes duplicados (con tests) |
 | `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
@@ -87,6 +88,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261129000000_editar_viaje_y_usuarios.sql` | Editar viajes (reglas por estado, precio nunca menor a lo cobrado, bloqueo optimista, auditoría con motivo) e invitaciones de usuarios |
 | `20261130000000_entrega_y_cancelacion.sql` | Entrega por auto, cancelar con anticipo (seña o a favor del cliente, desaplicando pagos sin borrarlos) y usar el saldo a favor en otros viajes |
 | `20261201000000_metricas.sql` | Métricas de cobranza para los gráficos (por mes, antigüedad de la deuda, días de cobro, quién debe más) |
+| `20261202000000_clientes_y_recordatorios.sql` | Clientes con saldos (`v_clientes`), recordatorios de cobro por WhatsApp registrados, datos para cobrar de la empresa y avance de entregas en la grilla |
 
 Para aplicar una (sirve desde el celular):
 

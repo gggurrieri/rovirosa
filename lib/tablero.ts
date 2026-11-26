@@ -47,3 +47,6 @@ export function saldoPorViaje(items: ItemSaldo[]): Map<string, Montos> {
 export function ventanaProximosDias(hoy: string, dias: number) {
   return { desde: hoy, hasta: sumarDias(hoy, dias) };
 }
+
+/** ¿Hay algún monto distinto de cero, en cualquier moneda? */
+export const tieneMonto = (m: Montos) => Object.values(m).some((v) => (v ?? 0) !== 0);
