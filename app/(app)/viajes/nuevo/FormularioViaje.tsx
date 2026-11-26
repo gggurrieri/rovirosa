@@ -7,7 +7,7 @@ import { formatearPlata, type Moneda } from "@/lib/formato";
 import { type AutoBorrador, armarViaje, avisosDisponibilidad, clientesParecidos } from "@/lib/viajes";
 import { crearViaje, type EstadoFormulario } from "../actions";
 
-type AutoUI = AutoBorrador & { key: number; busqueda: string; modoNuevo: boolean; precioEditado: boolean };
+export type AutoUI = AutoBorrador & { key: number; busqueda: string; modoNuevo: boolean; precioEditado: boolean };
 
 const estadoInicial: EstadoFormulario = { error: null };
 const RUTAS_FRECUENTES = 4;
@@ -22,7 +22,7 @@ const chip = (activo: boolean) =>
   }`;
 
 let siguienteClave = 1;
-const autoVacio = (precio: string): AutoUI => ({
+export const autoVacio = (precio: string): AutoUI => ({
   key: siguienteClave++,
   cliente_id: null,
   cliente_nuevo: null,
@@ -280,7 +280,7 @@ export function FormularioViaje({ id, hoy, opciones }: { id: string; hoy: string
   );
 }
 
-function TarjetaAuto({
+export function TarjetaAuto({
   numero,
   auto,
   otros,
@@ -431,14 +431,14 @@ function TarjetaAuto({
 
       {/* Precio */}
       <label className="flex items-center justify-between gap-3">
-        <span className="text-base text-slate-700">Precio ({moneda === "ARS" ? "$" : "US$"})</span>
+        <span className="shrink-0 text-base text-slate-700">Precio ({moneda === "ARS" ? "$" : "US$"})</span>
         <input
           aria-label={`Precio del auto ${numero}`}
           inputMode="decimal"
           placeholder="0"
           value={auto.precio}
           onChange={(e) => onCambiar({ precio: e.target.value, precioEditado: true })}
-          className={`${campo} w-40 text-right text-lg tabular-nums`}
+          className={`${campo} max-w-40 text-right text-lg tabular-nums`}
         />
       </label>
     </div>

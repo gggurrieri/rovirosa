@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { configSupabase } from "./config";
 
-const RUTAS_PUBLICAS = ["/login"];
+const RUTAS_PUBLICAS = ["/login", "/registro", "/auth/confirmar"];
 
 /**
  * Corre antes de cada página: refresca la sesión de Supabase (y guarda las

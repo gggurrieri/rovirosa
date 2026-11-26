@@ -112,6 +112,40 @@ const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const normalizar = (texto: string) =>
   texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
+/** Valida un auto del formulario y lo deja listo para la base. n: número de auto (para los mensajes). */
+export function armarItem(a: AutoBorrador, n: number): { ok: true; item: ItemNuevo } | { ok: false; error: string } {
+  const falla = (error: string) => ({ ok: false as const, error });
+  const item: Partial<ItemNuevo> = {};
+
+  if (a.cliente_id) {
+    item.cliente_id = a.cliente_id;
+  } else if (a.cliente_nuevo) {
+    const nombre = a.cliente_nuevo.nombre.trim().replace(/\s+/g, " ");
+    if (nombre === "") return falla(`Escribí el nombre del cliente nuevo (auto ${n}).`);
+    const whatsapp = a.cliente_nuevo.whatsapp.replace(/[^\d+]/g, "");
+    if (whatsapp !== "" && whatsapp.replace(/\D/g, "").length < 8) {
+      return falla(`Revisá el WhatsApp del cliente nuevo (auto ${n}): tiene que tener al menos 8 números.`);
+    }
+    item.cliente_nuevo = { nombre, whatsapp: whatsapp === "" ? null : whatsapp };
+  } else {
+    return falla(`Elegí el cliente del auto ${n}.`);
+  }
+
+  if (a.vehiculo_id) {
+    item.vehiculo_id = a.vehiculo_id;
+  } else {
+    const marca = a.marca.trim();
+    const modelo = a.modelo.trim();
+    if (marca === "" || modelo === "") return falla(`Escribí marca y modelo del auto ${n}.`);
+    item.vehiculo = { marca, modelo };
+  }
+
+  const precio = parsearPrecio(a.precio);
+  if (!precio.ok) return falla(`Auto ${n}: ${precio.error}`);
+  item.precio_centavos = precio.centavos;
+  return { ok: true, item: item as ItemNuevo };
+}
+
 export function armarViaje(b: ViajeBorrador): ViajeArmado {
   const falla = (error: string): ViajeArmado => ({ ok: false, error });
 
@@ -131,37 +165,9 @@ export function armarViaje(b: ViajeBorrador): ViajeArmado {
 
   const items: ItemNuevo[] = [];
   for (const [indice, a] of b.autos.entries()) {
-    const n = indice + 1;
-    const item: Partial<ItemNuevo> = {};
-
-    if (a.cliente_id) {
-      item.cliente_id = a.cliente_id;
-    } else if (a.cliente_nuevo) {
-      const nombre = a.cliente_nuevo.nombre.trim().replace(/\s+/g, " ");
-      if (nombre === "") return falla(`Escribí el nombre del cliente nuevo (auto ${n}).`);
-      const whatsapp = a.cliente_nuevo.whatsapp.replace(/[^\d+]/g, "");
-      if (whatsapp !== "" && whatsapp.replace(/\D/g, "").length < 8) {
-        return falla(`Revisá el WhatsApp del cliente nuevo (auto ${n}): tiene que tener al menos 8 números.`);
-      }
-      item.cliente_nuevo = { nombre, whatsapp: whatsapp === "" ? null : whatsapp };
-    } else {
-      return falla(`Elegí el cliente del auto ${n}.`);
-    }
-
-    if (a.vehiculo_id) {
-      item.vehiculo_id = a.vehiculo_id;
-    } else {
-      const marca = a.marca.trim();
-      const modelo = a.modelo.trim();
-      if (marca === "" || modelo === "") return falla(`Escribí marca y modelo del auto ${n}.`);
-      item.vehiculo = { marca, modelo };
-    }
-
-    const precio = parsearPrecio(a.precio);
-    if (!precio.ok) return falla(`Auto ${n}: ${precio.error}`);
-    item.precio_centavos = precio.centavos;
-
-    items.push(item as ItemNuevo);
+    const item = armarItem(a, indice + 1);
+    if (!item.ok) return falla(item.error);
+    items.push(item.item);
   }
 
   return {

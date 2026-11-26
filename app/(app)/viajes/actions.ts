@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { existeViaje, obtenerOpcionesViaje } from "@/lib/datos-viajes";
+import { existeViaje, obtenerOpcionesViaje, obtenerViaje, viajeOriginal } from "@/lib/datos-viajes";
+import { armarCambios } from "@/lib/edicion";
 import { mensajeDeBase } from "@/lib/errores";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { armarViaje } from "@/lib/viajes";
@@ -111,4 +112,78 @@ export async function cambiarEstado(_anterior: EstadoFormulario, formData: FormD
   if (error) return { error: mensajeDeBase(error) };
 
   redirect(`/viajes/${d.viaje_id}?estado=${d.hacia}`);
+}
+
+const auto = z.object({
+  cliente_id: z.guid().nullable(),
+  cliente_nuevo: z.object({ nombre: texto, whatsapp: z.string().max(40) }).nullable(),
+  vehiculo_id: z.guid().nullable(),
+  marca: z.string().max(60),
+  modelo: z.string().max(80),
+  precio: z.string().max(40),
+});
+const datosEdicion = z.object({
+  viaje_id: z.guid(),
+  version: z.string().max(64),
+  confirmarCero: z.boolean(),
+  fecha_salida: z.string().max(10),
+  fecha_llegada: z.string().max(10),
+  origen: texto,
+  destino: texto,
+  unidad_id: z.guid().nullable(),
+  chofer_id: z.guid().nullable(),
+  notas: z.string().max(1000),
+  precios: z.record(z.guid(), z.string().max(40)),
+  quitar: z.array(z.guid()).max(20),
+  agregar: z.array(auto).max(20),
+  motivo: z.string().max(300),
+});
+
+export async function editarViaje(_anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  let crudo: unknown;
+  try {
+    crudo = JSON.parse(String(formData.get("edicion") ?? ""));
+  } catch {
+    return { error: "No pudimos leer el formulario. Probá de nuevo." };
+  }
+  const validacion = datosEdicion.safeParse(crudo);
+  if (!validacion.success) return { error: "Revisá los datos del viaje y probá de nuevo." };
+  const d = validacion.data;
+
+  // Los cambios se arman contra el viaje como está AHORA en la base (lo cobrado,
+  // el estado), no contra lo que tenía la pantalla. La unidad sale de la base.
+  const armar = async () => {
+    const [viaje, { unidades }] = await Promise.all([obtenerViaje(d.viaje_id), obtenerOpcionesViaje()]);
+    if (!viaje) return null;
+    const unidad = unidades.find((u) => u.id === d.unidad_id);
+    return armarCambios(viajeOriginal(viaje), {
+      ...d,
+      capacidad: unidad?.capacidad_autos ?? null,
+      unidad_nombre: unidad?.nombre ?? "La unidad",
+    });
+  };
+  const armado = await armar();
+  if (!armado) return { error: "No se encontró el viaje." };
+  if (!armado.ok) return { error: armado.error };
+  if (armado.cantidad === 0) redirect(`/viajes/${d.viaje_id}`);
+  if (armado.autosEnCero > 0 && !d.confirmarCero) return { error: "Hay autos con precio $ 0. Confirmalo antes de guardar." };
+
+  const { motivo, ...cambios } = armado.cambios;
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.rpc("editar_viaje", {
+    p_viaje_id: d.viaje_id,
+    p_version: d.version,
+    p_cambios: cambios,
+    p_motivo: motivo ?? null,
+  });
+  if (error) {
+    // Reintento de un guardado que ya entró (doble toque o mala señal): el viaje ya
+    // quedó como se quería y no hay nada para cambiar. Es un éxito.
+    if (error.message.startsWith("El viaje cambió mientras lo editabas")) {
+      const otraVez = await armar();
+      if (otraVez?.ok && otraVez.cantidad === 0) redirect(`/viajes/${d.viaje_id}?editado=${armado.cantidad}`);
+    }
+    return { error: mensajeDeBase(error) };
+  }
+  redirect(`/viajes/${d.viaje_id}?editado=${armado.cantidad}`);
 }

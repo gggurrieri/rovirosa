@@ -49,7 +49,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 
 | Carpeta | Qué hay |
 | --- | --- |
-| `app/login/` | Pantalla de login y acciones de entrar y salir |
+| `app/login/`, `app/registro/` | Entrar, salir y crear el usuario de una persona invitada |
 | `app/(app)/` | Pantallas con sesión: Inicio, Viajes, Cobros, Más |
 | `components/` | Piezas de interfaz reutilizables (barra inferior, tarjetas, montos) |
 | `lib/formato.ts` | Plata en centavos → `$ 1.250.000`, fechas → `23/11/2026` |
@@ -57,6 +57,9 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/cobros.ts` | Montos escritos a mano, sugerencia de aplicación de pagos y validaciones (con tests) |
 | `lib/viajes.ts` | Estados del viaje, armado antes de guardar y avisos de disponibilidad (con tests) |
 | `lib/grilla.ts` | Filtros de la grilla en la URL, orden y exportación CSV para Excel (con tests) |
+| `lib/edicion.ts` | Qué se puede editar de un viaje según su estado y armado de los cambios (con tests) |
+| `lib/historial.ts` | Historial de cambios de un viaje en frases, desde la auditoría (con tests) |
+| `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
 | `proxy.ts` | Redirige a `/login` si no hay sesión (en Next.js 16 el "middleware" se llama "proxy") |
@@ -79,6 +82,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261126000000_viajes.sql` | Cargar viajes (con clientes y autos nuevos), cambiar su estado, blindaje entre empresas en viajes, autos y vehículos |
 | `20261127000000_resultados_y_comprobantes.sql` | Resultados del mes (con recuperado), "Empezó el viaje" con un toque, comprobantes en Storage privado por empresa |
 | `20261128000000_grilla_viajes.sql` | Búsqueda de viajes para la grilla (filtros, orden, páginas y totales en la base) |
+| `20261129000000_editar_viaje_y_usuarios.sql` | Editar viajes (reglas por estado, precio nunca menor a lo cobrado, bloqueo optimista, auditoría con motivo) e invitaciones de usuarios |
 
 Para aplicar una (sirve desde el celular):
 
@@ -86,6 +90,17 @@ Para aplicar una (sirve desde el celular):
 2. En Supabase: **SQL Editor → New query**, pegá el texto y tocá **Run**.
 3. Tiene que decir **Success. No rows returned**. Si da error, no sigas: copiá el mensaje y consultalo.
 4. **Primero la migración, después el deploy:** si la app nueva se publica antes de correr la migración, la pantalla Cobros va a fallar porque busca funciones que todavía no existen.
+
+## Sumar usuarios (invitaciones)
+
+El dueño invita desde **Más → Usuarios** (nombre, email y rol) y le manda el link por WhatsApp. La persona entra a `/registro`, crea su usuario con ese email, confirma el mail y, al primer ingreso, la base le asigna la empresa y el rol. Sin invitación, entra pero no ve nada.
+
+Para que funcione, una sola vez en Supabase:
+
+1. **Authentication → Sign In / Providers → Email**: activar **Allow new users to sign up** y dejar **Confirm email** activado.
+2. **Authentication → URL Configuration**: en **Site URL** poner la dirección de la app (por ejemplo `https://rovirosa-demo.netlify.app`) y agregar `https://rovirosa-demo.netlify.app/**` en **Redirect URLs**.
+
+El envío de mails del plan gratis de Supabase tiene un límite bajo (unos pocos por hora): alcanza para sumar de a una persona.
 
 ## Pruebas
 
