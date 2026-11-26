@@ -124,6 +124,9 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
               <Fila titulo="Viajes" valor={resultados.viajes} />
             </dl>
           )}
+          <Link href="/metricas" className="mt-3 flex min-h-11 items-center justify-end text-sm font-medium text-sky-700">
+            Ver métricas con gráficos →
+          </Link>
         </section>
       </div>
 
