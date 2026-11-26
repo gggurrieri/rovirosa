@@ -28,9 +28,9 @@ jobs:
       PGPASSWORD: postgres
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -53,14 +53,14 @@ jobs:
       - name: Instalar navegador para las pruebas de punta a punta
         run: npx playwright install --with-deps chromium
 
-      - name: Pruebas de punta a punta (375 px)
+      - name: Pruebas de punta a punta (375 y 1280 px)
         run: npm run test:e2e
         env:
           CAPTURAS: ${{ runner.temp }}/capturas
 
       - name: Guardar capturas y registros si algo falló
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: capturas-y-registros
           path: ${{ runner.temp }}/capturas

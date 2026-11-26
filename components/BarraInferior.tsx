@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const SECCIONES = [
+export const SECCIONES = [
   { href: "/", texto: "Inicio", icono: "M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5" },
   { href: "/viajes", texto: "Viajes", icono: "M2 15V7h11v8M13 10h4l3 3v2M2 15h18M6 18.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm11 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" },
   { href: "/cobros", texto: "Cobros", icono: "M3 7h18v10H3zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM6 10v4m12-4v4" },
@@ -16,7 +16,7 @@ export function BarraInferior() {
   return (
     <nav
       aria-label="Secciones"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="mx-auto grid max-w-md grid-cols-4">
         {SECCIONES.map(({ href, texto, icono }) => {
