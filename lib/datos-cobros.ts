@@ -29,6 +29,7 @@ export type Pago = {
   anulado_en: string | null;
   anulado_motivo: string | null;
   a_favor_centavos: number;
+  comprobante_path: string | null;
   aplicaciones: AplicacionDetalle[];
 };
 
@@ -93,7 +94,7 @@ export async function obtenerUltimosPagos(cantidad = 15): Promise<Pago[]> {
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase
     .from("v_pagos")
-    .select("id, cliente_id, cliente_nombre, fecha, monto_centavos, moneda, medio, titular, anulado_en, anulado_motivo, a_favor_centavos")
+    .select("id, cliente_id, cliente_nombre, fecha, monto_centavos, moneda, medio, titular, anulado_en, anulado_motivo, a_favor_centavos, comprobante_path")
     .order("fecha", { ascending: false })
     .order("creado_en", { ascending: false })
     .limit(cantidad);
@@ -105,7 +106,7 @@ export async function obtenerPago(id: string): Promise<Pago | null> {
   const supabase = await crearClienteServidor();
   const { data, error } = await supabase
     .from("v_pagos")
-    .select("id, cliente_id, cliente_nombre, fecha, monto_centavos, moneda, medio, titular, anulado_en, anulado_motivo, a_favor_centavos")
+    .select("id, cliente_id, cliente_nombre, fecha, monto_centavos, moneda, medio, titular, anulado_en, anulado_motivo, a_favor_centavos, comprobante_path")
     .eq("id", id)
     .maybeSingle();
   if (error) fallo("el pago", error);

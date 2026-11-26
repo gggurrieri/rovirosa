@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Cobros · Rovirosa" };
 const tieneMonto = (m: Record<string, number | undefined>) => Object.values(m).some((v) => (v ?? 0) > 0);
 
 export default async function Cobros({ searchParams }: PageProps<"/cobros">) {
-  const { registrado, anulado } = await searchParams;
+  const { registrado, anulado, comprobante } = await searchParams;
   const [clientes, pagos] = await Promise.all([obtenerSaldosClientes(), obtenerUltimosPagos()]);
 
   return (
@@ -18,6 +18,7 @@ export default async function Cobros({ searchParams }: PageProps<"/cobros">) {
 
       {registrado && <Aviso>Pago registrado. Los saldos ya están actualizados.</Aviso>}
       {anulado && <Aviso>Pago anulado. Los saldos volvieron a como estaban.</Aviso>}
+      {comprobante && <Aviso>Comprobante agregado al pago.</Aviso>}
 
       <Link
         href="/cobros/nuevo"
@@ -107,13 +108,26 @@ function TarjetaPago({ pago }: { pago: Pago }) {
         <p className="mt-1 text-sm text-amber-800">A favor: {formatearPlata(pago.a_favor_centavos, pago.moneda)}</p>
       )}
 
-      {anulado ? (
-        <p className="mt-2 text-sm font-medium text-red-700">Anulado: {pago.anulado_motivo}</p>
-      ) : (
-        <Link href={`/cobros/pagos/${pago.id}/anular`} className="mt-2 inline-block py-1 text-sm font-medium text-red-700">
-          Anular
-        </Link>
-      )}
+      <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1">
+        {pago.comprobante_path ? (
+          <a href={`/cobros/pagos/${pago.id}/comprobante`} target="_blank" rel="noopener" className="py-1 text-sm font-medium text-sky-700">
+            📎 Ver comprobante
+          </a>
+        ) : (
+          !anulado && (
+            <Link href={`/cobros/pagos/${pago.id}/adjuntar`} className="py-1 text-sm font-medium text-sky-700">
+              📎 Agregar comprobante
+            </Link>
+          )
+        )}
+        {anulado ? (
+          <p className="text-sm font-medium text-red-700">Anulado: {pago.anulado_motivo}</p>
+        ) : (
+          <Link href={`/cobros/pagos/${pago.id}/anular`} className="py-1 text-sm font-medium text-red-700">
+            Anular
+          </Link>
+        )}
+      </div>
     </li>
   );
 }

@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { parsearPlata, validarAplicaciones } from "@/lib/cobros";
+import { comprobanteDelFormulario, subirComprobante } from "@/lib/comprobante-servidor";
+import { obtenerSesion } from "@/lib/datos";
 import { existePago, obtenerPendientes } from "@/lib/datos-cobros";
 import { hoyEnArgentina } from "@/lib/formato";
 import { mensajeDeBase } from "@/lib/errores";
@@ -58,6 +60,17 @@ export async function registrarPago(_anterior: EstadoFormulario, formData: FormD
   const error = validarAplicaciones(pendientes, monto.centavos, pago.moneda, pago.aplicaciones);
   if (error) return { error };
 
+  // El comprobante se sube antes, a la carpeta del pago (su id ya existe desde que se abrió el formulario).
+  let rutaComprobante: string | null = null;
+  const archivo = comprobanteDelFormulario(formData);
+  if (archivo) {
+    const { perfil } = await obtenerSesion();
+    if (!perfil) return { error: "Tu usuario no tiene una empresa asignada." };
+    const subida = await subirComprobante(perfil.empresa_id, pago.id, archivo);
+    if (!subida.ok) return { error: subida.error };
+    rutaComprobante = subida.ruta;
+  }
+
   const supabase = await crearClienteServidor();
   const { error: errorBase } = await supabase.rpc("registrar_pago", {
     p_id: pago.id,
@@ -69,6 +82,7 @@ export async function registrarPago(_anterior: EstadoFormulario, formData: FormD
     p_titular: pago.titular,
     p_notas: pago.notas,
     p_aplicaciones: pago.aplicaciones,
+    p_comprobante_path: rutaComprobante,
   });
   if (errorBase) return { error: mensajeDeBase(errorBase) };
 
@@ -92,4 +106,28 @@ export async function anularPago(_anterior: EstadoFormulario, formData: FormData
   if (error) return { error: mensajeDeBase(error) };
 
   redirect(`/cobros?anulado=${validacion.data.id}`);
+}
+
+const datosAdjuntar = z.object({ id: z.guid() });
+
+/** Agrega el comprobante a un pago que se cargó sin él. */
+export async function adjuntarComprobante(_anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const validacion = datosAdjuntar.safeParse({ id: formData.get("id") });
+  if (!validacion.success) return { error: "No pudimos leer el pago. Recargá la página." };
+  const archivo = comprobanteDelFormulario(formData);
+  if (!archivo) return { error: "Adjuntá el comprobante (captura o PDF)." };
+
+  const { perfil } = await obtenerSesion();
+  if (!perfil) return { error: "Tu usuario no tiene una empresa asignada." };
+  const subida = await subirComprobante(perfil.empresa_id, validacion.data.id, archivo);
+  if (!subida.ok) return { error: subida.error };
+
+  const supabase = await crearClienteServidor();
+  const { error } = await supabase.rpc("adjuntar_comprobante", {
+    p_pago_id: validacion.data.id,
+    p_path: subida.ruta,
+  });
+  if (error) return { error: mensajeDeBase(error) };
+
+  redirect(`/cobros?comprobante=${validacion.data.id}`);
 }

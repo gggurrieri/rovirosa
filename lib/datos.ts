@@ -13,6 +13,8 @@ export type Perfil = {
   nombre: string;
   rol: Rol;
   empresa: string;
+  /** Solo para armar rutas de Storage; los datos los filtra RLS, nunca este id. */
+  empresa_id: string;
 };
 
 import type { EstadoViaje } from "./viajes";
@@ -49,7 +51,7 @@ export const obtenerSesion = cache(async () => {
 
   const { data: fila, error } = await supabase
     .from("perfiles")
-    .select("nombre, rol, empresas(nombre)")
+    .select("nombre, rol, empresa_id, empresas(nombre)")
     .eq("user_id", userId)
     .maybeSingle();
   if (error) fallo("tu perfil", error);
@@ -59,6 +61,7 @@ export const obtenerSesion = cache(async () => {
         nombre: fila.nombre,
         rol: fila.rol,
         empresa: (fila.empresas as unknown as { nombre: string } | null)?.nombre ?? "",
+        empresa_id: fila.empresa_id,
       }
     : null;
 

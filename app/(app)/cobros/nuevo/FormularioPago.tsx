@@ -5,6 +5,7 @@ import { useActionState, useMemo, useState } from "react";
 import { armarAplicaciones, ordenarPorAntiguedad, parsearPlata, validarAplicaciones } from "@/lib/cobros";
 import type { ItemPendienteDetalle } from "@/lib/datos-cobros";
 import { formatearFecha, formatearPlata, type Moneda } from "@/lib/formato";
+import { ZonaComprobante } from "@/components/ZonaComprobante";
 import { type EstadoFormulario, registrarPago } from "../actions";
 
 type ClienteOpcion = { id: string; nombre: string; deuda: number };
@@ -261,7 +262,10 @@ export function FormularioPago({
         </section>
       )}
 
-      {/* 4. Detalles (con valores por defecto) */}
+      {/* 4. Comprobante: pegar, arrastrar o adjuntar */}
+      <ZonaComprobante />
+
+      {/* 5. Detalles (con valores por defecto) */}
       <section className="flex flex-col gap-3">
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 text-base font-semibold text-slate-700">Medio</legend>
