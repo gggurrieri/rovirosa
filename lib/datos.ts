@@ -42,30 +42,47 @@ export function aCentavos(valor: unknown): number {
   return numero;
 }
 
-/** Usuario logueado y su perfil. Sin sesión, manda a /login. Sin perfil, perfil = null. */
+export type Acceso = "activo" | "desactivado" | "sin_invitacion" | "sin_confirmar";
+
+/**
+ * Usuario logueado y su perfil. Sin sesión, manda a /login. Sin perfil, intenta
+ * tomar una invitación pendiente para su email (primer ingreso de un invitado);
+ * si no hay, perfil = null y "acceso" dice por qué.
+ */
 export const obtenerSesion = cache(async () => {
   const supabase = await crearClienteServidor();
   const { data } = await supabase.auth.getClaims();
   const userId = data?.claims?.sub;
   if (!userId) redirect("/login");
+  const email = (data?.claims?.email as string | undefined) ?? "";
 
-  const { data: fila, error } = await supabase
-    .from("perfiles")
-    .select("nombre, rol, empresa_id, empresas(nombre)")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (error) fallo("tu perfil", error);
+  // La segunda lectura agrega un filtro a propósito: Next.js reutiliza el resultado de
+  // una consulta idéntica dentro de la misma carga de página, y después de aceptar la
+  // invitación hay que leer el perfil recién creado, no el "sin perfil" de antes.
+  const leerPerfil = async (otraVez = false): Promise<Perfil | null> => {
+    const consulta = supabase.from("perfiles").select("nombre, rol, empresa_id, empresas(nombre)").eq("user_id", userId);
+    const { data: fila, error } = await (otraVez ? consulta.eq("activo", true) : consulta).maybeSingle();
+    if (error) fallo("tu perfil", error);
+    return fila
+      ? {
+          nombre: fila.nombre,
+          rol: fila.rol,
+          empresa: (fila.empresas as unknown as { nombre: string } | null)?.nombre ?? "",
+          empresa_id: fila.empresa_id,
+        }
+      : null;
+  };
 
-  const perfil: Perfil | null = fila
-    ? {
-        nombre: fila.nombre,
-        rol: fila.rol,
-        empresa: (fila.empresas as unknown as { nombre: string } | null)?.nombre ?? "",
-        empresa_id: fila.empresa_id,
-      }
-    : null;
+  let perfil = await leerPerfil();
+  let acceso: Acceso = "activo";
+  if (!perfil) {
+    const { data: estado, error } = await supabase.rpc("aceptar_invitacion");
+    if (error) fallo("tu invitación", error);
+    if (estado === "aceptada") perfil = await leerPerfil(true);
+    else acceso = estado === "desactivado" || estado === "sin_confirmar" ? estado : "sin_invitacion";
+  }
 
-  return { email: (data?.claims?.email as string | undefined) ?? "", perfil };
+  return { userId, email, perfil, acceso };
 });
 
 /** Solo dueño y administrativo ven viajes y cobros en la fase 1 (igual que RLS). */

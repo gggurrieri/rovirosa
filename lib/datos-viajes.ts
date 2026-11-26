@@ -4,6 +4,7 @@ import { aCentavos, fallo } from "./datos";
 import { hoyEnArgentina, type Moneda, sumarDias } from "./formato";
 import type { EstadoCobro } from "./tablero";
 import { crearClienteServidor } from "./supabase/server";
+import type { ViajeOriginal } from "./edicion";
 import type { EstadoViaje } from "./viajes";
 
 export type Tarifa = { id: string; origen: string; destino: string; precio_base_centavos: number; moneda: Moneda };
@@ -118,6 +119,8 @@ export type DetalleViaje = {
   destino: string;
   estado: EstadoViaje;
   notas: string | null;
+  unidad_id: string | null;
+  chofer_id: string | null;
   unidad: string | null;
   chofer: string | null;
   autos: AutoDelViaje[];
@@ -128,7 +131,7 @@ export async function obtenerViaje(id: string): Promise<DetalleViaje | null> {
   const [viaje, autos] = await Promise.all([
     supabase
       .from("viajes")
-      .select("id, numero, fecha_salida, fecha_llegada_estimada, origen, destino, estado, notas, unidades(nombre), choferes(nombre)")
+      .select("id, numero, fecha_salida, fecha_llegada_estimada, origen, destino, estado, notas, unidad_id, chofer_id, unidades(nombre), choferes(nombre)")
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -151,6 +154,8 @@ export async function obtenerViaje(id: string): Promise<DetalleViaje | null> {
     destino: v.destino,
     estado: v.estado,
     notas: v.notas,
+    unidad_id: v.unidad_id,
+    chofer_id: v.chofer_id,
     unidad: (v.unidades as unknown as { nombre: string } | null)?.nombre ?? null,
     chofer: (v.choferes as unknown as { nombre: string } | null)?.nombre ?? null,
     autos: (autos.data ?? []).map((a) => ({
@@ -166,5 +171,40 @@ export async function obtenerViaje(id: string): Promise<DetalleViaje | null> {
       vencido: a.vencido === true,
       fecha_entrega: a.fecha_entrega,
     })),
+  };
+}
+
+/** Nombre de un auto para mensajes e historial: "Audi R8 (Juan Pérez)". */
+export const nombreAuto = (a: Pick<AutoDelViaje, "vehiculo" | "cliente_nombre">) =>
+  `${a.vehiculo ?? "auto"} (${a.cliente_nombre})`;
+
+/** Versión del viaje para el bloqueo optimista (ver version_viaje en la base). */
+export async function obtenerVersionViaje(id: string): Promise<string> {
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase.rpc("version_viaje", { p_viaje_id: id });
+  if (error) fallo("la versión del viaje", error);
+  return data as string;
+}
+
+/** El viaje como lo necesita la edición: solo autos activos, con nombre para los mensajes. */
+export function viajeOriginal(v: DetalleViaje): ViajeOriginal {
+  return {
+    estado: v.estado,
+    fecha_salida: v.fecha_salida,
+    fecha_llegada: v.fecha_llegada_estimada,
+    origen: v.origen,
+    destino: v.destino,
+    unidad_id: v.unidad_id,
+    chofer_id: v.chofer_id,
+    notas: v.notas,
+    autos: v.autos
+      .filter((a) => a.estado_cobro !== "cancelado")
+      .map((a) => ({
+        item_id: a.item_id,
+        nombre: nombreAuto(a),
+        moneda: a.moneda,
+        precio_centavos: a.precio_centavos,
+        cobrado_centavos: a.cobrado_centavos,
+      })),
   };
 }

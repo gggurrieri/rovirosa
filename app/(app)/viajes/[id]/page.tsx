@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChipEstado } from "@/components/ChipEstado";
+import { obtenerSesion } from "@/lib/datos";
+import { obtenerHistorial } from "@/lib/datos-historial";
 import { obtenerViaje } from "@/lib/datos-viajes";
 import { formatearFecha, formatearPlata, hoyEnArgentina } from "@/lib/formato";
+import { formatearMomento, type LineaHistorial } from "@/lib/historial";
 import { NOMBRE_ESTADO } from "@/lib/viajes";
 import { AccionesEstado } from "./AccionesEstado";
 
@@ -20,10 +23,12 @@ const COBRO: Record<string, { texto: string; clases: string }> = {
 
 export default async function DetalleViaje({ params, searchParams }: PageProps<"/viajes/[id]">) {
   const { id } = await params;
-  const { creado, estado: cambio } = await searchParams;
+  const { creado, estado: cambio, editado } = await searchParams;
   if (!ES_UUID.test(id)) notFound();
-  const viaje = await obtenerViaje(id);
+  const [viaje, { perfil }] = await Promise.all([obtenerViaje(id), obtenerSesion()]);
   if (!viaje) notFound();
+  // El historial sale de la auditoría, que solo ve el dueño.
+  const historial = perfil?.rol === "dueno" ? await obtenerHistorial(viaje) : null;
 
   const tienePagos = viaje.autos.some((a) => a.cobrado_centavos > 0);
 
@@ -34,6 +39,11 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
       </Link>
 
       {creado && <Aviso>Viaje #{viaje.numero} guardado.</Aviso>}
+      {typeof editado === "string" && /^\d+$/.test(editado) && (
+        <Aviso>
+          Viaje #{viaje.numero} actualizado ({editado} {editado === "1" ? "cambio" : "cambios"}).
+        </Aviso>
+      )}
       {typeof cambio === "string" && cambio in NOMBRE_ESTADO && (
         <Aviso>Estado actualizado: {NOMBRE_ESTADO[cambio as keyof typeof NOMBRE_ESTADO]}.</Aviso>
       )}
@@ -53,6 +63,12 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
           {viaje.unidad ?? "Sin unidad"} · {viaje.chofer ?? "sin chofer"}
         </p>
         {viaje.notas && <p className="mt-3 text-base whitespace-pre-line text-slate-700">{viaje.notas}</p>}
+        <Link
+          href={`/viajes/${viaje.id}/editar`}
+          className="mt-4 flex h-12 items-center justify-center rounded-xl border border-slate-300 text-base font-medium text-slate-800 active:bg-slate-50 lg:inline-flex lg:h-11 lg:px-6"
+        >
+          ✏️ Editar viaje
+        </Link>
       </section>
 
       <AccionesEstado
@@ -102,7 +118,36 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
           })}
         </ul>
       </section>
+
+      {historial && <Historial lineas={historial} />}
     </div>
+  );
+}
+
+function Historial({ lineas }: { lineas: LineaHistorial[] }) {
+  return (
+    <details className="rounded-2xl bg-white p-4 shadow-sm">
+      <summary className="text-base font-semibold text-slate-700">Historial de cambios ({lineas.length})</summary>
+      {lineas.length === 0 ? (
+        <p className="mt-3 text-base text-slate-600">Todavía no hay cambios registrados.</p>
+      ) : (
+        <ol className="mt-3 flex flex-col gap-3">
+          {lineas.map((l) => (
+            <li key={`${l.en}-${l.quien}`} className="border-l-2 border-slate-200 pl-3">
+              <p className="text-sm text-slate-500">
+                {formatearMomento(l.en)} · {l.quien}
+              </p>
+              <ul className="text-base">
+                {l.cambios.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+              {l.motivo && <p className="text-sm text-slate-600">Motivo: {l.motivo}</p>}
+            </li>
+          ))}
+        </ol>
+      )}
+    </details>
   );
 }
 

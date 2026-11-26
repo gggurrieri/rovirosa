@@ -8,7 +8,7 @@ import { SinAcceso } from "./SinAcceso";
  * desde 1024 px, menú lateral y contenido ancho.
  */
 export default async function LayoutAutenticado({ children }: LayoutProps<"/">) {
-  const { email, perfil } = await obtenerSesion();
+  const { email, perfil, acceso } = await obtenerSesion();
   const empresa = perfil?.empresa || "Rovirosa";
 
   return (
@@ -18,7 +18,7 @@ export default async function LayoutAutenticado({ children }: LayoutProps<"/">) 
       </header>
       <MenuLateral empresa={empresa} />
       <main className="mx-auto w-full max-w-md px-4 py-5 lg:max-w-6xl lg:px-8 lg:py-8">
-        {puedeVerOperacion(perfil) ? children : <SinAcceso email={email} conPerfil={perfil !== null} />}
+        {puedeVerOperacion(perfil) ? children : <SinAcceso email={email} conPerfil={perfil !== null} acceso={acceso} />}
       </main>
       <BarraInferior />
     </div>

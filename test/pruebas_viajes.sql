@@ -104,11 +104,12 @@ do $$ begin
 end $$;
 
 do $$ declare v uuid := '22222222-0000-4000-8000-000000000001'; begin
+  -- La salida se corre hacia atrás antes de que salga (después, la base ya no deja cambiarla).
+  update public.viajes set fecha_salida = public.hoy_ar() - 12 where id = v;
   perform public.cambiar_estado_viaje(v, 'programado', 'en_retiro');
   perform public.cambiar_estado_viaje(v, 'en_retiro', 'en_viaje');
-  perform pg_temp.espera_error(format($q$select public.cambiar_estado_viaje(%L, 'en_viaje', 'entregado', public.hoy_ar() - 10)$q$, v),
+  perform pg_temp.espera_error(format($q$select public.cambiar_estado_viaje(%L, 'en_viaje', 'entregado', public.hoy_ar() - 13)$q$, v),
     'La fecha de entrega no puede ser antes de la salida', '5a');
-  update public.viajes set fecha_salida = public.hoy_ar() - 12 where id = v;
   perform public.cambiar_estado_viaje(v, 'en_viaje', 'entregado', public.hoy_ar() - 10);
   if pg_temp.vencido() <> 460000000 then raise exception 'FALLA 5: vencido %', pg_temp.vencido(); end if;
   raise notice 'OK 5: entregado hace 10 días → sus autos impagos aparecen vencidos ($ 4.600.000)';

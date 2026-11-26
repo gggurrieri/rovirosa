@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { BotonCerrarSesion } from "@/components/BotonCerrarSesion";
 import { obtenerSesion } from "@/lib/datos";
+import { NOMBRE_ROL } from "@/lib/usuarios";
 
 export const metadata: Metadata = { title: "Más · Rovirosa" };
 
@@ -13,7 +15,17 @@ export default async function Mas() {
       <section className="rounded-2xl bg-white p-5 shadow-sm">
         <p className="text-lg font-semibold">{perfil?.nombre}</p>
         <p className="text-base break-all text-slate-600">{email}</p>
+        {perfil && <p className="text-sm text-slate-500">{NOMBRE_ROL[perfil.rol]}</p>}
       </section>
+      {perfil?.rol === "dueno" && (
+        <Link
+          href="/mas/usuarios"
+          className="flex min-h-14 items-center justify-between rounded-2xl bg-white px-5 py-3 text-lg font-semibold shadow-sm active:bg-slate-50"
+        >
+          <span>👥 Usuarios</span>
+          <span className="text-sm font-normal text-slate-500">Invitar y desactivar →</span>
+        </Link>
+      )}
       <BotonCerrarSesion />
     </div>
   );

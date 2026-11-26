@@ -13,6 +13,7 @@ const PASSWORD = "demo1234";
 const RELACIONES = { empresas: "empresa_id", unidades: "unidad_id", choferes: "chofer_id" };
 const OPS = { eq: "=", neq: "<>", gte: ">=", lte: "<=", gt: ">", lt: "<" };
 const archivos = new Map(); // "bucket/ruta" → { tipo, datos }
+const claves = new Map(); // email → contraseña de los usuarios que se registran en la prueba
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const leerB64 = (t) => JSON.parse(Buffer.from(t, "base64url").toString());
@@ -136,10 +137,23 @@ http.createServer(async (req, res) => {
     res.end(data === undefined ? "" : crudo ? data : JSON.stringify(data));
   };
   try {
+    if (url.pathname === "/auth/v1/signup") {
+      // Como Supabase con "Confirm email" activado: crea el usuario sin confirmar y no da sesión.
+      const { email, password } = await cuerpo(req);
+      if (!password || password.length < 6) return enviar(422, { code: "weak_password", error_code: "weak_password", msg: "Password should be at least 6 characters" });
+      const { rows: [existente] } = await pool.query("select id, email from auth.users where email = $1", [email]);
+      if (existente) return enviar(200, { ...usuario(existente), identities: [] }); // Supabase no revela si existe
+      const { rows: [nuevo] } = await pool.query(
+        "insert into auth.users (id, email, email_confirmed_at) values (gen_random_uuid(), $1, null) returning id, email", [email]);
+      claves.set(email, password);
+      console.log(`REGISTRO ${email}`);
+      return enviar(200, { ...usuario(nuevo), identities: [{ id: nuevo.id }], confirmation_sent_at: new Date().toISOString() });
+    }
     if (url.pathname === "/auth/v1/token") {
       const { email, password } = await cuerpo(req);
-      const { rows } = await pool.query("select id, email from auth.users where email = $1", [email]);
-      if (!rows[0] || password !== PASSWORD) return enviar(400, { code: "invalid_credentials", error_code: "invalid_credentials", msg: "Invalid login credentials" });
+      const { rows } = await pool.query("select id, email, email_confirmed_at from auth.users where email = $1", [email]);
+      if (!rows[0] || password !== (claves.get(email) ?? PASSWORD)) return enviar(400, { code: "invalid_credentials", error_code: "invalid_credentials", msg: "Invalid login credentials" });
+      if (!rows[0].email_confirmed_at) return enviar(400, { code: "email_not_confirmed", error_code: "email_not_confirmed", msg: "Email not confirmed" });
       const access_token = token(rows[0]);
       return enviar(200, { access_token, token_type: "bearer", expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: "r1", user: usuario(rows[0]) });
     }
