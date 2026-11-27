@@ -10,6 +10,7 @@ MIGRACIONES=(supabase/migrations/*.sql)
 
 bash test/e2e/preparar-base.sh
 scripts/backup/hacer-backup.sh "dbname=$ORIGEN" "$TMP/backup.sql"
+if grep -q "^SET transaction_timeout" "$TMP/backup.sql"; then echo "FALLA: el backup trae un parámetro que Postgres 16 no conoce"; exit 1; fi
 
 # Encriptar y desencriptar como lo hace la tarea de GitHub
 echo "clave-de-prueba" | gpg --batch --quiet --yes --pinentry-mode loopback --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "$TMP/backup.sql.gpg" "$TMP/backup.sql"

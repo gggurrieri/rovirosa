@@ -14,5 +14,7 @@ SALIDA=$2
   pg_dump "$CONEXION" --data-only --no-owner --no-privileges --table='auth.users' --table='auth.identities'
   pg_dump "$CONEXION" --data-only --no-owner --no-privileges --schema=public
   echo "set session_replication_role = origin;"
-} >"$SALIDA"
+} | sed '/^SET transaction_timeout = /d' >"$SALIDA"
+# pg_dump 17 escribe "SET transaction_timeout", que Postgres 15/16 no conoce: sin esa línea
+# (no cambia ningún dato) el backup se restaura en cualquier versión.
 echo "Backup listo: $(wc -c <"$SALIDA") bytes"
