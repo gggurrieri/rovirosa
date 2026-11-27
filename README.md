@@ -67,6 +67,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/configuracion.ts` | Lectura del CSV de tarifas que guarda Excel (con tests) |
 | `lib/calendario.ts` | Rango de 2 semanas o mes, barras en carriles, choques y estado de cada unidad por día (con tests) |
 | `lib/ics.ts` | Calendario iCal para suscribirse desde Google, iPhone u Outlook, y link "Agregar a Google Calendar" (con tests) |
+| `lib/distancias.ts` | Km por ruta entre dos lugares con OpenRouteService (perfil camión) y link a Google Maps (con tests) |
 | `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
@@ -82,6 +83,16 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 ## Backups y Supabase activo
 
 Un backup semanal encriptado y una consulta cada 3 días para que el plan gratis no pause el proyecto, con tareas automáticas de GitHub. Configuración (dos secrets, una sola vez) y cómo restaurar: [docs/backups.md](docs/backups.md).
+
+## Km automáticos en tarifas (opcional)
+
+En **Configuración → Tarifas**, el botón **📍 Calcular km** busca el origen y el destino y completa los km por ruta (perfil camión), con [OpenRouteService](https://openrouteservice.org) (servidor `api.heigit.org`) y datos de OpenStreetMap. Plan gratis: 2.000 rutas por día. La consulta la hace el servidor: la clave nunca llega al navegador, y solo se mandan nombres de lugares.
+
+1. Creá una cuenta gratis en openrouteservice.org y copiá la **Basic Key** (plan *Standard*).
+2. En Netlify: **Site configuration → Environment variables → Add a variable**: `ORS_API_KEY` = la clave. Sin `NEXT_PUBLIC_`: es secreta.
+3. **Deploys → Trigger deploy** para que tome la variable.
+
+Sin la clave, el botón no aparece y queda el link **Ver en Google Maps** para cargar los km a mano. Antes de vender Tracker a otras transportistas, confirmá con OpenRouteService que el plan gratis admite uso comercial.
 
 ## App instalable
 

@@ -137,6 +137,20 @@ http.createServer(async (req, res) => {
     res.end(data === undefined ? "" : crudo ? data : JSON.stringify(data));
   };
   try {
+    // OpenRouteService simulado (Calcular km de una tarifa): dos lugares conocidos y una ruta fija.
+    if (url.pathname.startsWith("/ors/")) {
+      if (req.headers.authorization !== "clave-ors-prueba") return enviar(403, { error: "Access to this API has been disallowed" });
+      if (url.pathname === "/ors/pelias/v1/search") {
+        const lugares = { "buenos aires": ["Buenos Aires, CABA, Argentina", -58.38, -34.6], bariloche: ["San Carlos de Bariloche, RN, Argentina", -71.31, -41.13] };
+        const l = lugares[(url.searchParams.get("text") ?? "").trim().toLowerCase()];
+        return enviar(200, { features: l ? [{ geometry: { coordinates: [l[1], l[2]] }, properties: { label: l[0] } }] : [] });
+      }
+      if (url.pathname === "/ors/openrouteservice/v2/directions/driving-hgv") {
+        await cuerpo(req);
+        return enviar(200, { routes: [{ summary: { distance: 1579612.4 } }] });
+      }
+      return enviar(404, {});
+    }
     if (url.pathname === "/auth/v1/signup") {
       // Como Supabase con "Confirm email" activado: crea el usuario sin confirmar y no da sesión.
       const { email, password } = await cuerpo(req);

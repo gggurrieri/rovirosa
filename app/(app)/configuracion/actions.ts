@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { parsearPlata } from "@/lib/cobros";
 import { parsearCSVTarifas } from "@/lib/configuracion";
+import { obtenerSesion, puedeVerOperacion } from "@/lib/datos";
+import { calcularDistancia, type ResultadoDistancia } from "@/lib/distancias";
 import { mensajeDeBase } from "@/lib/errores";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
@@ -126,4 +128,14 @@ export async function importarTarifas(_anterior: Estado, formData: FormData): Pr
   if (error) return { error: mensajeDeBase(error) };
   const r = data as { creadas: number; actualizadas: number };
   redirect(`/configuracion/tarifas?creadas=${r.creadas}&actualizadas=${r.actualizadas}`);
+}
+
+/** "Calcular km" de una tarifa: consulta OpenRouteService desde el servidor (la clave no sale de acá). */
+export async function calcularKm(origen: string, destino: string): Promise<ResultadoDistancia> {
+  const { perfil } = await obtenerSesion();
+  if (!puedeVerOperacion(perfil)) return { ok: false, error: "No tenés permiso para calcular distancias." };
+  return calcularDistancia(String(origen).slice(0, 80), String(destino).slice(0, 80), {
+    clave: process.env.ORS_API_KEY ?? "",
+    url: process.env.ORS_URL ?? "https://api.heigit.org", // api.openrouteservice.org se dio de baja en 2026
+  });
 }

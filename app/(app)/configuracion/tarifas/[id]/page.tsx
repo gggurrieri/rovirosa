@@ -12,7 +12,7 @@ export default async function Tarifa({ params }: PageProps<"/configuracion/tarif
   return (
     <div className="flex flex-col gap-4 lg:max-w-xl">
       <Encabezado volver={{ href: "/configuracion/tarifas", texto: "Tarifas" }} titulo={tarifa ? `${tarifa.origen} → ${tarifa.destino}` : "Nueva tarifa"} />
-      <FormularioTarifa tarifa={tarifa} />
+      <FormularioTarifa tarifa={tarifa} calculoAutomatico={Boolean(process.env.ORS_API_KEY)} />
     </div>
   );
 }
