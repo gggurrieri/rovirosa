@@ -45,10 +45,11 @@ const c = require("./comun.cjs");
   await page.click("[role=option]:has-text('Buenos Aires')");
   c.ok((await page.inputValue("input[name=origen]")) === "Buenos Aires", "Sugiere un lugar ya usado en otras tarifas y lo completa");
   const antes = await consultas();
-  await page.locator("input[name=destino]").pressSequentially("Bari", { delay: 60 });
+  // Un texto que ninguna otra prueba busca: el servidor guarda lo ya buscado y no lo vuelve a pedir
+  await page.locator("input[name=destino]").pressSequentially("Barilo", { delay: 60 });
   await page.waitForSelector("[role=option]:has-text('San Carlos de Bariloche')");
   const despues = await consultas();
-  c.ok((despues["/ors/pelias/v1/autocomplete"] ?? 0) - (antes["/ors/pelias/v1/autocomplete"] ?? 0) === 1, "Escribir 4 letras seguidas hace UNA sola consulta (espera a que se deje de tipear)");
+  c.ok((despues["/ors/pelias/v1/autocomplete"] ?? 0) - (antes["/ors/pelias/v1/autocomplete"] ?? 0) === 1, "Escribir 6 letras seguidas hace UNA sola consulta (espera a que se deje de tipear)");
   await page.screenshot({ path: `${c.CAPTURAS}/t2-sugerencias.png`, fullPage: true });
   // Primero va "Bariloche" (ya usado en la tarifa guardada arriba); después las del servicio
   c.ok((await page.locator("[role=option]").first().innerText()).startsWith("Bariloche"), "Los lugares propios aparecen primero");

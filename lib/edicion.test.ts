@@ -142,3 +142,24 @@ describe("armarCambios", () => {
     expect(r.ok && r.autosEnCero).toBe(1);
   });
 });
+
+describe("armarCambios: Se entrega en", () => {
+  const conEntregas: ViajeOriginal = { ...original, autos: original.autos.map((a, i) => ({ ...a, entrega: i === 0 ? "Bariloche" : null })) };
+  it("el formulario arranca con lo guardado y sin tocar no hay cambios", () => {
+    expect(borradorDesde(conEntregas).entregas).toEqual({ i1: "Bariloche", i2: "" });
+    expect(armarCambios(conEntregas, con({}, conEntregas))).toEqual({ ok: true, cambios: {}, cantidad: 0, autosEnCero: 0 });
+  });
+  it("manda solo las que cambiaron; vaciar = null", () => {
+    const r = armarCambios(conEntregas, con({ entregas: { i1: "", i2: " Mendoza " } }, conEntregas));
+    expect(r).toEqual({ ok: true, cambios: { entregas: [{ item_id: "i1", entrega: null }, { item_id: "i2", entrega: "Mendoza" }] }, cantidad: 2, autosEnCero: 0 });
+  });
+  it("se corrige aunque el viaje ya haya salido, pero no si está cancelado", () => {
+    expect(armarCambios({ ...conEntregas, estado: "en_viaje" }, con({ entregas: { i2: "Mendoza" } }, conEntregas)).ok).toBe(true);
+    const cancelado = armarCambios({ ...conEntregas, estado: "cancelado" }, con({ entregas: { i2: "Mendoza" } }, conEntregas));
+    expect(cancelado.ok).toBe(false);
+  });
+  it("un auto que se quita no manda entrega", () => {
+    const r = armarCambios(conEntregas, con({ entregas: { i2: "Mendoza" }, quitar: ["i2"] }, conEntregas));
+    expect(r.ok && r.cambios.entregas).toBeUndefined();
+  });
+});

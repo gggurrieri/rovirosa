@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChipEstado } from "@/components/ChipEstado";
 import { obtenerOpcionesViaje, obtenerVersionViaje, obtenerViaje, viajeOriginal } from "@/lib/datos-viajes";
+import { hayCalculoAutomatico } from "@/lib/ors";
 import { FormularioEdicion } from "./FormularioEdicion";
 
 export const metadata: Metadata = { title: "Editar viaje · Tracker" };
@@ -33,6 +34,8 @@ export default async function EditarViaje({ params }: PageProps<"/viajes/[id]/ed
         version={version}
         original={viajeOriginal(viaje)}
         opciones={opciones}
+        lugaresUsados={[...new Set([...opciones.tarifas, ...opciones.agenda].flatMap((x) => [x.origen, x.destino]))]}
+        conServicio={hayCalculoAutomatico()}
       />
     </div>
   );

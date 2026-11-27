@@ -33,6 +33,7 @@ const datosViaje = z.object({
         marca: z.string().max(60),
         modelo: z.string().max(80),
         precio: z.string().max(40),
+        entrega: z.string().max(200).optional(),
       }),
     )
     .max(20),
@@ -121,6 +122,7 @@ const auto = z.object({
   marca: z.string().max(60),
   modelo: z.string().max(80),
   precio: z.string().max(40),
+  entrega: z.string().max(200).optional(),
 });
 const datosEdicion = z.object({
   viaje_id: z.guid(),
@@ -134,6 +136,7 @@ const datosEdicion = z.object({
   chofer_id: z.guid().nullable(),
   notas: z.string().max(1000),
   precios: z.record(z.guid(), z.string().max(40)),
+  entregas: z.record(z.guid(), z.string().max(200)).optional(),
   quitar: z.array(z.guid()).max(20),
   anticipos: z.record(z.guid(), z.enum(["sena", "a_favor"])).optional(),
   agregar: z.array(auto).max(20),

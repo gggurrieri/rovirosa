@@ -4,7 +4,7 @@
 
 import type { Anticipo } from "./entregas";
 import { formatearPlata, type Moneda } from "./formato";
-import { type AutoBorrador, armarItem, type EstadoViaje, type ItemNuevo, parsearPrecio, validarCapacidad } from "./viajes";
+import { type AutoBorrador, armarItem, type EstadoViaje, type ItemNuevo, limpiarEntrega, MAXIMO_ENTREGA, parsearPrecio, validarCapacidad } from "./viajes";
 
 export type CampoViaje = "fecha_salida" | "fecha_llegada" | "origen" | "destino" | "unidad_id" | "chofer_id" | "notas";
 
@@ -46,6 +46,8 @@ export type AutoOriginal = {
   moneda: Moneda;
   precio_centavos: number;
   cobrado_centavos: number;
+  /** Dónde se entrega ese auto (null = el destino del viaje). */
+  entrega?: string | null;
 };
 
 export type ViajeOriginal = {
@@ -72,6 +74,8 @@ export type EdicionBorrador = {
   notas: string;
   /** Precio escrito por item_id, como lo tipeó la persona. */
   precios: Record<string, string>;
+  /** "Se entrega en" escrito por item_id. */
+  entregas?: Record<string, string>;
   quitar: string[];
   /** Qué pasa con lo cobrado de cada auto con pagos que se quita. */
   anticipos?: Record<string, Anticipo>;
@@ -85,6 +89,7 @@ export type EdicionBorrador = {
 export type CambiosViaje = {
   viaje?: Partial<Record<CampoViaje, string | null>>;
   precios?: { item_id: string; precio_centavos: number }[];
+  entregas?: { item_id: string; entrega: string | null }[];
   /** El id del auto, o { item_id, anticipo } si tiene pagos. */
   quitar?: (string | { item_id: string; anticipo: Anticipo })[];
   agregar?: ItemNuevo[];
@@ -109,6 +114,7 @@ export function borradorDesde(v: ViajeOriginal): Omit<EdicionBorrador, "capacida
     chofer_id: v.chofer_id,
     notas: v.notas ?? "",
     precios: Object.fromEntries(v.autos.map((a) => [a.item_id, sinSimbolo(a.precio_centavos, a.moneda)])),
+    entregas: Object.fromEntries(v.autos.map((a) => [a.item_id, a.entrega ?? ""])),
     quitar: [],
     agregar: [],
     motivo: "",
@@ -179,6 +185,21 @@ export function armarCambios(o: ViajeOriginal, b: EdicionBorrador): CambiosArmad
     if (precioPideMotivo(o.estado) && b.motivo.trim() === "") return falla("Escribí el motivo del cambio de precio.");
     cambios.precios = precios;
     cantidad += precios.length;
+  }
+
+  // 2b. Dónde se entrega cada auto (se puede corregir siempre, salvo en un viaje cancelado)
+  const entregas: { item_id: string; entrega: string | null }[] = [];
+  for (const a of o.autos) {
+    if (b.quitar.includes(a.item_id) || !b.entregas || !(a.item_id in b.entregas)) continue;
+    const entrega = limpiarEntrega(b.entregas[a.item_id]);
+    if (entrega === false) return falla(`${a.nombre}: el lugar de entrega es muy largo (hasta ${MAXIMO_ENTREGA} letras).`);
+    if (entrega === (a.entrega ?? null)) continue;
+    if (o.estado === "cancelado") return falla(mensajeEdicion(o.estado));
+    entregas.push({ item_id: a.item_id, entrega });
+  }
+  if (entregas.length > 0) {
+    cambios.entregas = entregas;
+    cantidad += entregas.length;
   }
 
   // 3. Quitar y agregar autos

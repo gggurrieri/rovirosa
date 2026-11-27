@@ -2,6 +2,43 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+/** Campos que abren el teclado (no casillas ni botones). */
+function abreTeclado(el: Element | null) {
+  if (!el) return false;
+  if (el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) return true;
+  return el instanceof HTMLInputElement && !["checkbox", "radio", "file", "button", "submit", "reset", "range", "color"].includes(el.type);
+}
+
+/**
+ * true mientras se escribe en un campo. En iPhone, con el teclado abierto, Safari deja la barra
+ * fija flotando sobre el formulario y tapa "Guardar": se oculta. Al dejar de escribir vuelve con
+ * una demora, así el toque que sacó el foco (por ejemplo en "Guardar") no cae sobre la barra.
+ */
+function useEscribiendo() {
+  const [escribiendo, setEscribiendo] = useState(false);
+  useEffect(() => {
+    let espera: ReturnType<typeof setTimeout> | undefined;
+    const entra = (e: FocusEvent) => {
+      if (!abreTeclado(e.target as Element)) return;
+      clearTimeout(espera);
+      setEscribiendo(true);
+    };
+    const sale = () => {
+      clearTimeout(espera);
+      espera = setTimeout(() => setEscribiendo(abreTeclado(document.activeElement)), 400);
+    };
+    document.addEventListener("focusin", entra);
+    document.addEventListener("focusout", sale);
+    return () => {
+      clearTimeout(espera);
+      document.removeEventListener("focusin", entra);
+      document.removeEventListener("focusout", sale);
+    };
+  }, []);
+  return escribiendo;
+}
 
 type Seccion = { href: string; texto: string; icono: string; soloComputadora?: boolean };
 
@@ -18,11 +55,13 @@ export const SECCIONES: Seccion[] = [
 
 export function BarraInferior() {
   const ruta = usePathname();
+  const escribiendo = useEscribiendo();
 
   return (
     <nav
       aria-label="Secciones"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+      data-barra-inferior
+      className={`fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] lg:hidden ${escribiendo ? "hidden" : ""}`}
     >
       <ul className="mx-auto grid max-w-md grid-cols-5">
         {SECCIONES.filter((s) => !s.soloComputadora).map(({ href, texto, icono }) => {

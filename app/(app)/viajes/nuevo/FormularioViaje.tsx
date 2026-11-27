@@ -5,6 +5,8 @@ import { useActionState, useState } from "react";
 import type { OpcionesViaje, Vehiculo } from "@/lib/datos-viajes";
 import { formatearPlata, type Moneda } from "@/lib/formato";
 import { type AutoBorrador, armarViaje, avisosDisponibilidad, clientesParecidos } from "@/lib/viajes";
+import { CampoEntrega } from "@/components/CampoEntrega";
+import { CampoLugar } from "@/components/CampoLugar";
 import { crearViaje, type EstadoFormulario } from "../actions";
 
 export type AutoUI = AutoBorrador & { key: number; busqueda: string; modoNuevo: boolean; precioEditado: boolean };
@@ -41,10 +43,16 @@ export function FormularioViaje({
   opciones,
   unidadInicial = null,
   fechaInicial = null,
+  lugaresUsados = [],
+  conServicio = false,
 }: {
   id: string;
   hoy: string;
   opciones: OpcionesViaje;
+  /** Ciudades ya usadas en tarifas y viajes: se sugieren al escribir "Otra ruta". */
+  lugaresUsados?: string[];
+  /** Hay clave de OpenRouteService: también sugiere ciudades del mapa. */
+  conServicio?: boolean;
   /** Desde el calendario: la unidad y el día ya elegidos. */
   unidadInicial?: string | null;
   fechaInicial?: string | null;
@@ -84,13 +92,14 @@ export function FormularioViaje({
     capacidad: unidad?.capacidad_autos ?? null,
     chofer_id: choferId,
     notas,
-    autos: autos.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio }) => ({
+    autos: autos.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio, entrega }) => ({
       cliente_id,
       cliente_nuevo,
       vehiculo_id,
       marca,
       modelo,
       precio,
+      entrega,
     })),
   };
   const armado = armarViaje(borrador);
@@ -167,8 +176,10 @@ export function FormularioViaje({
         </div>
         {otraRuta && (
           <div className="grid grid-cols-2 gap-2">
-            <input aria-label="Origen" placeholder="Origen" value={origen} onChange={(e) => setOrigen(e.target.value)} className={campo} />
-            <input aria-label="Destino" placeholder="Destino" value={destino} onChange={(e) => setDestino(e.target.value)} className={campo} />
+            <CampoLugar etiqueta="Origen" mostrarEtiqueta={false} valor={origen} propios={lugaresUsados} conServicio={conServicio} clase={campo}
+              onEscribir={setOrigen} onElegir={(t) => setOrigen(t)} />
+            <CampoLugar etiqueta="Destino" mostrarEtiqueta={false} valor={destino} propios={lugaresUsados} conServicio={conServicio} clase={campo}
+              onEscribir={setDestino} onElegir={(t) => setDestino(t)} />
             <div className="col-span-2 flex gap-2" role="radiogroup" aria-label="Moneda">
               {(["ARS", "USD"] as const).map((m) => (
                 <button key={m} type="button" role="radio" aria-checked={moneda === m} onClick={() => setMoneda(m)} className={`${chip(moneda === m)} flex-1 text-center`}>
@@ -455,6 +466,7 @@ export function TarjetaAuto({
           className={`${campo} max-w-40 text-right text-lg tabular-nums`}
         />
       </label>
+      <CampoEntrega numero={numero} valor={auto.entrega ?? ""} onCambiar={(entrega) => onCambiar({ entrega })} />
     </div>
   );
 }

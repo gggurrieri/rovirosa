@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { obtenerTarifasConfig } from "@/lib/datos-configuracion";
+import { hayCalculoAutomatico } from "@/lib/ors";
 import { Encabezado } from "../../componentes";
 import { FormularioTarifa } from "./FormularioTarifa";
 
@@ -14,7 +15,7 @@ export default async function Tarifa({ params }: PageProps<"/configuracion/tarif
   return (
     <div className="flex flex-col gap-4 lg:max-w-xl">
       <Encabezado volver={{ href: "/configuracion/tarifas", texto: "Tarifas" }} titulo={tarifa ? `${tarifa.origen} → ${tarifa.destino}` : "Nueva tarifa"} />
-      <FormularioTarifa tarifa={tarifa} calculoAutomatico={Boolean(process.env.ORS_API_KEY)} lugaresUsados={lugaresUsados} />
+      <FormularioTarifa tarifa={tarifa} calculoAutomatico={hayCalculoAutomatico()} lugaresUsados={lugaresUsados} />
     </div>
   );
 }
