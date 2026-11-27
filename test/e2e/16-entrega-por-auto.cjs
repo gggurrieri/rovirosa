@@ -50,8 +50,11 @@ const bmw = c.sql(`select i.id from public.items_viaje i join public.vehiculos v
   // Con el teclado abierto (un campo con foco) la barra de abajo no tapa el formulario
   const barra = page.locator("[data-barra-inferior]");
   await page.locator("input[aria-label='Se entrega en, auto 1']").focus();
+  await barra.waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
   c.ok(!(await barra.isVisible()), "Mientras se escribe, la barra de abajo se oculta (no tapa Guardar)");
   await page.locator("input[aria-label='Se entrega en, auto 1']").blur();
+  c.ok(!(await barra.isVisible()), "Justo al salir del campo la barra sigue oculta un instante (el toque no cae sobre ella)");
+  await barra.waitFor({ state: "visible", timeout: 2000 }).catch(() => {});
   c.ok(await barra.isVisible(), "Al dejar de escribir, la barra vuelve");
 
   c.ok(page.errores.length === 0, `Sin errores de JavaScript ${page.errores.join(" ")}`);

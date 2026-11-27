@@ -8,11 +8,3 @@ body {
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
 }
-
-/* Celular: con el teclado abierto, Safari (iPhone) deja la barra fija de abajo flotando sobre
-   el formulario y tapa "Guardar". Mientras se escribe en un campo, la barra se oculta. */
-body:has(input:focus:not([type="checkbox"]):not([type="radio"]):not([type="file"])) [data-barra-inferior],
-body:has(textarea:focus) [data-barra-inferior],
-body:has(select:focus) [data-barra-inferior] {
-  display: none;
-}
