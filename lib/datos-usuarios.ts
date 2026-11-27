@@ -1,6 +1,8 @@
 // Usuarios de la empresa e invitaciones pendientes. Las invitaciones solo las ve
 // el dueño (RLS); los perfiles, cualquiera de la empresa.
 
+import { resumirUso, type Uso } from "./adopcion";
+import { sumarDias } from "./formato";
 import { fallo } from "./datos";
 import { crearClienteServidor } from "./supabase/server";
 import type { Rol } from "./datos";
@@ -30,4 +32,12 @@ export async function obtenerUsuarios(): Promise<{ usuarios: Usuario[]; invitaci
   if (usuarios.error) fallo("los usuarios", usuarios.error);
   if (invitaciones.error) fallo("las invitaciones", invitaciones.error);
   return { usuarios: usuarios.data ?? [], invitaciones: invitaciones.data ?? [] };
+}
+
+/** Días en que cada usuario de la empresa usó la app (el último año). Solo el dueño ve los de todos. */
+export async function obtenerUso(hoy: string): Promise<Record<string, Uso>> {
+  const supabase = await crearClienteServidor();
+  const { data, error } = await supabase.from("accesos").select("user_id, dia").gte("dia", sumarDias(hoy, -365));
+  if (error) fallo("el uso de la app", error);
+  return resumirUso(data ?? [], hoy);
 }

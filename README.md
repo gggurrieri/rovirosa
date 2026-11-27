@@ -100,6 +100,15 @@ Sin la clave, el botón no aparece y queda el link **Ver en Google Maps** para c
 
 Desde el celular: **Más → Instalá la app** (Android: un botón; iPhone: Compartir → Agregar a inicio). Los íconos salen de `scripts/generar-iconos.mjs`. El service worker (`public/sw.js`) solo muestra "Sin conexión" cuando no hay señal: no guarda datos.
 
+## Seguridad
+
+- **Cada empresa ve solo lo suyo**: todas las tablas tienen RLS y las vistas usan los permisos de quien consulta (`security_invoker`). Las pruebas SQL lo verifican con ids reales de otra empresa.
+- **Nada se borra** y todo cambio queda en `auditoria`. Ni el dueño puede borrar pagos.
+- Las funciones con permisos elevados (`security definer`) controlan el rol adentro y tienen `search_path` fijo.
+- El navegador solo usa la clave pública de Supabase; la de OpenRouteService y la conexión de los backups viven en Netlify y GitHub como secretos.
+- Encabezados de seguridad en todas las respuestas (`next.config.ts`): sin marcos de otros sitios, sin cámara, micrófono ni ubicación.
+- En Supabase conviene: **Authentication → Providers → Email → contraseña mínima de 8** y "Confirm email" activado.
+
 ## Aplicar una migración nueva en Supabase
 
 Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, y se aplican **en orden** por la fecha del nombre. Nunca se edita una migración que ya corrió.
@@ -119,6 +128,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261204000000_calendario.sql` | Calendario: agenda por rango, bloqueos (service, VTV, francos) que se anulan con motivo y avisan choques |
 | `20261205000000_calendario_google.sql` | Calendario en Google: link personal (token) que se puede regenerar; el feed trae fechas, rutas y unidades, nunca precios ni clientes |
 | `20261206000000_entrega_por_auto.sql` | "Se entrega en" por auto (viajes que dejan autos en varias ciudades): crear y editar viaje lo guardan, y el recordatorio de cobro dice el destino de cada auto. Solo reemplaza funciones |
+| `20261207000000_accesos.sql` | Adopción: un registro por persona y por día en que usó la app (solo lo ve el dueño, en Más → Usuarios). No se puede inventar ni borrar |
 
 Para aplicar una (sirve desde el celular):
 

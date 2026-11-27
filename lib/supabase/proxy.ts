@@ -1,6 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { hoyEnArgentina } from "@/lib/formato";
 import { configSupabase } from "./config";
+
+// Adopción: la primera vez en el día que alguien usa la app se anota (registrar_acceso).
+// La cookie evita repetirlo en cada pantalla; lleva el usuario, por si otro entra en el mismo navegador.
+const COOKIE_USO = "tracker_uso";
 
 const RUTAS_PUBLICAS = ["/login", "/registro", "/auth/confirmar"];
 
@@ -36,6 +41,16 @@ export async function actualizarSesion(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const hayUsuario = Boolean(data?.claims?.sub);
   const esPublica = RUTAS_PUBLICAS.some((r) => ruta === r || ruta.startsWith(`${r}/`));
+
+  if (hayUsuario && !esPublica) {
+    const marca = `${hoyEnArgentina()}:${data!.claims.sub}`;
+    if (request.cookies.get(COOKIE_USO)?.value !== marca) {
+      const { error } = await supabase.rpc("registrar_acceso");
+      if (!error) {
+        respuesta.cookies.set(COOKIE_USO, marca, { httpOnly: true, sameSite: "lax", secure: request.nextUrl.protocol === "https:", maxAge: 60 * 60 * 36, path: "/" });
+      }
+    }
+  }
 
   if (!hayUsuario && !esPublica) {
     return redirigir(request, "/login", respuesta);
