@@ -1,16 +1,18 @@
 "use client";
 
 import { useActionState, useRef, useState, useTransition } from "react";
-import { linkGoogleMaps, type ResultadoDistancia } from "@/lib/distancias";
+import { type Coordenadas, linkGoogleMaps, type ResultadoDistancia } from "@/lib/distancias";
 import type { TarifaConfig } from "@/lib/datos-configuracion";
 import { formatearPlata } from "@/lib/formato";
 import { calcularKm, type Estado, guardarTarifa } from "../../actions";
 import { campo, ErrorForm } from "../../componentes";
+import { CampoLugar } from "./CampoLugar";
 
-export function FormularioTarifa({ tarifa, calculoAutomatico }: { tarifa: TarifaConfig | null; calculoAutomatico: boolean }) {
+export function FormularioTarifa({ tarifa, calculoAutomatico, lugaresUsados }: { tarifa: TarifaConfig | null; calculoAutomatico: boolean; lugaresUsados: string[] }) {
   const [estado, accion, enviando] = useActionState<Estado, FormData>(guardarTarifa, { error: null });
   const [origen, setOrigen] = useState(tarifa?.origen ?? "");
   const [destino, setDestino] = useState(tarifa?.destino ?? "");
+  const [ubicaciones, setUbicaciones] = useState<{ origen: Coordenadas | null; destino: Coordenadas | null }>({ origen: null, destino: null });
   const [calculo, setCalculo] = useState<ResultadoDistancia | null>(null);
   const [calculando, iniciar] = useTransition();
   const km = useRef<HTMLInputElement>(null);
@@ -18,7 +20,7 @@ export function FormularioTarifa({ tarifa, calculoAutomatico }: { tarifa: Tarifa
 
   function calcular() {
     iniciar(async () => {
-      const r = await calcularKm(origen, destino);
+      const r = await calcularKm(origen, destino, ubicaciones);
       setCalculo(r);
       if (r.ok && km.current) km.current.value = String(r.km);
     });
@@ -28,14 +30,24 @@ export function FormularioTarifa({ tarifa, calculoAutomatico }: { tarifa: Tarifa
     <form action={accion} className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm">
       <input type="hidden" name="id" value={tarifa?.id ?? "nueva"} />
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-600">Origen</span>
-          <input name="origen" required maxLength={80} value={origen} onChange={(e) => { setOrigen(e.target.value); setCalculo(null); }} className={campo} />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-600">Destino</span>
-          <input name="destino" required maxLength={80} value={destino} onChange={(e) => { setDestino(e.target.value); setCalculo(null); }} className={campo} />
-        </label>
+        <CampoLugar
+          nombre="origen"
+          etiqueta="Origen"
+          valor={origen}
+          propios={lugaresUsados}
+          conServicio={calculoAutomatico}
+          onEscribir={(t) => { setOrigen(t); setUbicaciones((u) => ({ ...u, origen: null })); setCalculo(null); }}
+          onElegir={(t, c) => { setOrigen(t); setUbicaciones((u) => ({ ...u, origen: c })); setCalculo(null); }}
+        />
+        <CampoLugar
+          nombre="destino"
+          etiqueta="Destino"
+          valor={destino}
+          propios={lugaresUsados}
+          conServicio={calculoAutomatico}
+          onEscribir={(t) => { setDestino(t); setUbicaciones((u) => ({ ...u, destino: null })); setCalculo(null); }}
+          onElegir={(t, c) => { setDestino(t); setUbicaciones((u) => ({ ...u, destino: c })); setCalculo(null); }}
+        />
         <label className="flex flex-col gap-1">
           <span className="text-sm text-slate-600">Km</span>
           <input ref={km} name="km" type="number" inputMode="numeric" min={1} required defaultValue={tarifa?.km} className={campo} />

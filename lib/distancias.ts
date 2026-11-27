@@ -8,13 +8,17 @@ export type ResultadoDistancia =
   | { ok: false; error: string };
 
 type Config = { clave: string; url: string; fetch?: typeof fetch };
+export type Coordenadas = [number, number]; // [longitud, latitud]
+export type Lugar = { nombre: string; coordenadas: Coordenadas };
+/** Ubicaciones ya elegidas de las sugerencias: así "Calcular km" no vuelve a buscarlas. */
+export type Conocidos = { origen?: Coordenadas | null; destino?: Coordenadas | null };
 
 const PAISES = "AR,CL,UY,PY,BO,BR"; // Argentina y limítrofes
 const ESPERA_MS = 8000;
 
 class ErrorServicio extends Error {}
 
-export async function calcularDistancia(origen: string, destino: string, config: Config): Promise<ResultadoDistancia> {
+export async function calcularDistancia(origen: string, destino: string, config: Config, conocidos: Conocidos = {}): Promise<ResultadoDistancia> {
   const o = origen.trim();
   const d = destino.trim();
   if (!o || !d) return { ok: false, error: "Completá origen y destino." };
@@ -22,7 +26,9 @@ export async function calcularDistancia(origen: string, destino: string, config:
   const f = config.fetch ?? fetch;
 
   try {
-    const [desde, hasta] = await Promise.all([buscarLugar(o, config, f), buscarLugar(d, config, f)]);
+    const ubicar = (texto: string, c?: Coordenadas | null) =>
+      c && coordenadasValidas(c) ? Promise.resolve<Lugar>({ nombre: texto, coordenadas: c }) : buscarLugar(texto, config, f);
+    const [desde, hasta] = await Promise.all([ubicar(o, conocidos.origen), ubicar(d, conocidos.destino)]);
     for (const [texto, lugar] of [[o, desde], [d, hasta]] as const) {
       if (!lugar) return { ok: false, error: `No encontré "${texto}". Probá con ciudad y provincia, por ejemplo "Bariloche, Río Negro".` };
     }
@@ -42,14 +48,63 @@ export async function calcularDistancia(origen: string, destino: string, config:
   }
 }
 
-async function buscarLugar(texto: string, config: Config, f: typeof fetch) {
+async function buscarLugar(texto: string, config: Config, f: typeof fetch): Promise<Lugar | null> {
   const q = new URLSearchParams({ text: texto, size: "1", "boundary.country": PAISES, layers: "locality,localadmin,county,region,venue,address" });
   const r = await pedir(f, `${config.url}/pelias/v1/search?${q}`, { headers: { Authorization: config.clave, Accept: "application/json" } });
   revisar(r);
-  const lugar = (await r.json())?.features?.[0];
-  const coordenadas = lugar?.geometry?.coordinates;
-  if (!Array.isArray(coordenadas) || coordenadas.length < 2) return null;
-  return { nombre: String(lugar.properties?.label ?? texto), coordenadas: [Number(coordenadas[0]), Number(coordenadas[1])] };
+  return aLugares(await r.json(), texto)[0] ?? null;
+}
+
+function aLugares(json: unknown, texto: string): Lugar[] {
+  const features = (json as { features?: unknown[] } | null)?.features;
+  if (!Array.isArray(features)) return [];
+  return features.flatMap((x) => {
+    const lugar = x as { geometry?: { coordinates?: unknown }; properties?: { label?: unknown } };
+    const c = lugar.geometry?.coordinates;
+    if (!Array.isArray(c) || c.length < 2) return [];
+    const coordenadas: Coordenadas = [Number(c[0]), Number(c[1])];
+    return coordenadasValidas(coordenadas) ? [{ nombre: String(lugar.properties?.label ?? texto), coordenadas }] : [];
+  });
+}
+
+export const coordenadasValidas = (c: unknown): c is Coordenadas =>
+  Array.isArray(c) && c.length === 2 && c.every((n) => typeof n === "number" && Number.isFinite(n)) &&
+  Math.abs(c[0] as number) <= 180 && Math.abs(c[1] as number) <= 90;
+
+export const MINIMO_SUGERENCIAS = 3;
+
+/**
+ * Sugerencias mientras se escribe (hasta 5 lugares de Argentina y limítrofes). Nunca falla:
+ * sin clave, sin cupo o con el servicio caído devuelve [] y se sigue escribiendo a mano.
+ */
+export async function sugerirLugares(texto: string, config: Config): Promise<Lugar[]> {
+  const t = texto.trim();
+  if (t.length < MINIMO_SUGERENCIAS || !config.clave) return [];
+  try {
+    const q = new URLSearchParams({ text: t, size: "5", "boundary.country": PAISES, layers: "locality,localadmin,county,region" });
+    const r = await pedir(config.fetch ?? fetch, `${config.url}/pelias/v1/autocomplete?${q}`, {
+      headers: { Authorization: config.clave, Accept: "application/json" },
+    });
+    if (!r.ok) return [];
+    const vistos = new Set<string>();
+    return aLugares(await r.json(), t).filter((l) => !vistos.has(l.nombre) && vistos.add(l.nombre)).slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+const sinTildes = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+/** Lugares ya usados en las tarifas de la empresa que coinciden con lo escrito (sin consultar a nadie). */
+export function filtrarPropios(propios: string[], texto: string, maximo = 3): string[] {
+  const t = sinTildes(texto);
+  if (!t) return [];
+  const unicos = new Map<string, string>();
+  for (const p of propios) if (!unicos.has(sinTildes(p))) unicos.set(sinTildes(p), p.trim());
+  return [...unicos.values()]
+    .filter((p) => sinTildes(p).includes(t) && sinTildes(p) !== t)
+    .sort((a, b) => Number(!sinTildes(b).startsWith(t)) - Number(!sinTildes(a).startsWith(t)) || a.localeCompare(b, "es"))
+    .slice(0, maximo);
 }
 
 function pedir(f: typeof fetch, url: string, init: RequestInit) {

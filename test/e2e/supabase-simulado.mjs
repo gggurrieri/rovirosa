@@ -130,6 +130,8 @@ async function storage(req, url, enviar) {
   return enviar(404, { message: "Storage: ruta no simulada " + url.pathname });
 }
 
+const consultasORS = {};
+
 http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   const enviar = (status, data, headers = {}, crudo = false) => {
@@ -138,12 +140,20 @@ http.createServer(async (req, res) => {
   };
   try {
     // OpenRouteService simulado (Calcular km de una tarifa): dos lugares conocidos y una ruta fija.
+    if (url.pathname === "/ors/_contador") return enviar(200, consultasORS); // para las pruebas
     if (url.pathname.startsWith("/ors/")) {
       if (req.headers.authorization !== "clave-ors-prueba") return enviar(403, { error: "Access to this API has been disallowed" });
+      consultasORS[url.pathname] = (consultasORS[url.pathname] ?? 0) + 1;
+      const lugares = { "buenos aires": ["Buenos Aires, CABA, Argentina", -58.38, -34.6], bariloche: ["San Carlos de Bariloche, RN, Argentina", -71.31, -41.13] };
+      const feature = (l) => ({ geometry: { coordinates: [l[1], l[2]] }, properties: { label: l[0] } });
       if (url.pathname === "/ors/pelias/v1/search") {
-        const lugares = { "buenos aires": ["Buenos Aires, CABA, Argentina", -58.38, -34.6], bariloche: ["San Carlos de Bariloche, RN, Argentina", -71.31, -41.13] };
         const l = lugares[(url.searchParams.get("text") ?? "").trim().toLowerCase()];
-        return enviar(200, { features: l ? [{ geometry: { coordinates: [l[1], l[2]] }, properties: { label: l[0] } }] : [] });
+        return enviar(200, { features: l ? [feature(l)] : [] });
+      }
+      if (url.pathname === "/ors/pelias/v1/autocomplete") {
+        const t = (url.searchParams.get("text") ?? "").trim().toLowerCase();
+        const extra = { barilari: ["Barilari, BA, Argentina", -60.2, -35.1] };
+        return enviar(200, { features: Object.entries({ ...lugares, ...extra }).filter(([k]) => k.startsWith(t)).map(([, l]) => feature(l)) });
       }
       if (url.pathname === "/ors/openrouteservice/v2/directions/driving-hgv") {
         await cuerpo(req);

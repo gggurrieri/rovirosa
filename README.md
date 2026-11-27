@@ -92,6 +92,8 @@ En **Configuración → Tarifas**, el botón **📍 Calcular km** busca el orige
 2. En Netlify: **Site configuration → Environment variables → Add a variable**: `ORS_API_KEY` = la clave. Sin `NEXT_PUBLIC_`: es secreta.
 3. **Deploys → Trigger deploy** para que tome la variable.
 
+Mientras escribís Origen o Destino aparecen **sugerencias**: primero los lugares ya usados en tus tarifas (al instante) y después los de OpenRouteService (desde la tercera letra, medio segundo después de dejar de tipear, sin repetir búsquedas). Elegir una sugerencia guarda su ubicación, así "Calcular km" no la vuelve a buscar. El autocompletado tiene su propio cupo diario (más chico que el de rutas): si se agota, simplemente no aparecen sugerencias.
+
 Sin la clave, el botón no aparece y queda el link **Ver en Google Maps** para cargar los km a mano. Antes de vender Tracker a otras transportistas, confirmá con OpenRouteService que el plan gratis admite uso comercial.
 
 ## App instalable

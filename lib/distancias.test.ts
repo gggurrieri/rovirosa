@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { calcularDistancia, linkGoogleMaps } from "./distancias";
+import { calcularDistancia, filtrarPropios, linkGoogleMaps, sugerirLugares } from "./distancias";
 
 const lugar = (label: string, lon: number, lat: number) => ({ features: [{ geometry: { coordinates: [lon, lat] }, properties: { label } }] });
 const json = (status: number, cuerpo: unknown) => new Response(JSON.stringify(cuerpo), { status, headers: { "content-type": "application/json" } });
@@ -66,4 +66,52 @@ it("linkGoogleMaps arma la ruta en Google Maps", () => {
   expect(u.searchParams.get("origin")).toBe("Buenos Aires");
   expect(u.searchParams.get("destination")).toBe("Bariloche, Río Negro");
   expect(u.searchParams.get("travelmode")).toBe("driving");
+});
+
+describe("Calcular km con lugares elegidos de las sugerencias", () => {
+  it("no vuelve a buscar los lugares que ya tienen ubicación", async () => {
+    const f = servidor({ "ruta:*": json(200, { routes: [{ summary: { distance: 400000 } }] }) });
+    const r = await calcularDistancia("Rosario, Santa Fe", "Córdoba, Córdoba", { ...config, fetch: f }, { origen: [-60.64, -32.95], destino: [-64.18, -31.42] });
+    expect(r).toEqual({ ok: true, km: 400, origen: "Rosario, Santa Fe", destino: "Córdoba, Córdoba" });
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+  it("ignora ubicaciones inválidas y busca el lugar", async () => {
+    const f = servidor({ "geo:*": () => json(200, lugar("Rosario, SF, Argentina", -60.6, -32.9)), "ruta:*": json(200, { routes: [{ summary: { distance: 1000 } }] }) });
+    await calcularDistancia("Rosario", "Rosario", { ...config, fetch: f }, { origen: [999, 0] as [number, number] });
+    expect(f).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("sugerirLugares", () => {
+  it("devuelve hasta 5 lugares sin repetir", async () => {
+    const f = vi.fn(async (url: RequestInfo | URL) => {
+      expect(new URL(String(url)).pathname).toBe("/pelias/v1/autocomplete");
+      return json(200, { features: [lugar("San Carlos de Bariloche, RN, Argentina", -71.3, -41.1), lugar("San Carlos de Bariloche, RN, Argentina", -71.3, -41.1), lugar("Barilari, BA, Argentina", -60, -35)].map((x) => x.features[0]) });
+    });
+    expect(await sugerirLugares("Bari", { ...config, fetch: f })).toEqual([
+      { nombre: "San Carlos de Bariloche, RN, Argentina", coordenadas: [-71.3, -41.1] },
+      { nombre: "Barilari, BA, Argentina", coordenadas: [-60, -35] },
+    ]);
+  });
+  it("con menos de 3 letras, sin clave, sin cupo o caído: lista vacía, sin romper", async () => {
+    const f = vi.fn(async () => json(429, {}));
+    expect(await sugerirLugares("Ba", { ...config, fetch: f })).toEqual([]);
+    expect(f).not.toHaveBeenCalled();
+    expect(await sugerirLugares("Bari", { ...config, clave: "", fetch: f })).toEqual([]);
+    expect(await sugerirLugares("Bari", { ...config, fetch: f })).toEqual([]);
+    expect(await sugerirLugares("Bari", { ...config, fetch: vi.fn(async () => { throw new Error("x"); }) })).toEqual([]);
+  });
+});
+
+describe("filtrarPropios", () => {
+  const propios = ["Buenos Aires", "buenos aires ", "Córdoba", "Bariloche", "Mar del Plata", "Rosario"];
+  it("sin tildes ni mayúsculas, primero los que empiezan igual, sin repetir", () => {
+    expect(filtrarPropios(propios, "cor")).toEqual(["Córdoba"]);
+    expect(filtrarPropios(propios, "ar")).toEqual(["Bariloche", "Mar del Plata", "Rosario"]);
+    expect(filtrarPropios(propios, "bue")).toEqual(["Buenos Aires"]);
+  });
+  it("no sugiere lo que ya está escrito completo", () => {
+    expect(filtrarPropios(propios, "Rosario")).toEqual([]);
+    expect(filtrarPropios(propios, "  ")).toEqual([]);
+  });
 });
