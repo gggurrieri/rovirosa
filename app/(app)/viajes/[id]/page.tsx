@@ -127,6 +127,7 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
                       {a.cliente_nombre}
                     </Link>
                     <p className="text-sm text-slate-500">{a.vehiculo ?? "Auto sin datos"}</p>
+                    {a.entrega && <p className="text-sm font-medium break-words text-slate-700">📍 Se entrega en {a.entrega}</p>}
                   </div>
                   <p className={`shrink-0 text-sm ${cobro?.clases ?? ""}`}>{cobro?.texto}</p>
                 </div>

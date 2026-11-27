@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import type { OpcionesViaje, Vehiculo } from "@/lib/datos-viajes";
 import { formatearPlata, type Moneda } from "@/lib/formato";
 import { type AutoBorrador, armarViaje, avisosDisponibilidad, clientesParecidos } from "@/lib/viajes";
+import { CampoEntrega } from "@/components/CampoEntrega";
 import { crearViaje, type EstadoFormulario } from "../actions";
 
 export type AutoUI = AutoBorrador & { key: number; busqueda: string; modoNuevo: boolean; precioEditado: boolean };
@@ -84,13 +85,14 @@ export function FormularioViaje({
     capacidad: unidad?.capacidad_autos ?? null,
     chofer_id: choferId,
     notas,
-    autos: autos.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio }) => ({
+    autos: autos.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio, entrega }) => ({
       cliente_id,
       cliente_nuevo,
       vehiculo_id,
       marca,
       modelo,
       precio,
+      entrega,
     })),
   };
   const armado = armarViaje(borrador);
@@ -455,6 +457,7 @@ export function TarjetaAuto({
           className={`${campo} max-w-40 text-right text-lg tabular-nums`}
         />
       </label>
+      <CampoEntrega numero={numero} valor={auto.entrega ?? ""} onCambiar={(entrega) => onCambiar({ entrega })} />
     </div>
   );
 }

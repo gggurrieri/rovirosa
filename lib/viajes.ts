@@ -79,6 +79,8 @@ export type AutoBorrador = {
   marca: string;
   modelo: string;
   precio: string;
+  /** "Se entrega en": ciudad o dirección donde se deja ESE auto (viajes con varias paradas). */
+  entrega?: string;
 };
 
 export type ViajeBorrador = {
@@ -102,6 +104,7 @@ export type ItemNuevo = {
   vehiculo_id?: string;
   vehiculo?: { marca: string; modelo: string };
   precio_centavos: number;
+  entrega?: string;
 };
 
 export type ViajeArmado =
@@ -111,6 +114,15 @@ export type ViajeArmado =
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const normalizar = (texto: string) =>
   texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+
+export const MAXIMO_ENTREGA = 120;
+
+/** "  Bariloche,   Río Negro " → "Bariloche, Río Negro"; "" → null; más de 120 letras → false. */
+export function limpiarEntrega(texto: string | null | undefined): string | null | false {
+  const t = (texto ?? "").trim().replace(/\s+/g, " ");
+  if (t === "") return null;
+  return t.length > MAXIMO_ENTREGA ? false : t;
+}
 
 /** Valida un auto del formulario y lo deja listo para la base. n: número de auto (para los mensajes). */
 export function armarItem(a: AutoBorrador, n: number): { ok: true; item: ItemNuevo } | { ok: false; error: string } {
@@ -143,6 +155,9 @@ export function armarItem(a: AutoBorrador, n: number): { ok: true; item: ItemNue
   const precio = parsearPrecio(a.precio);
   if (!precio.ok) return falla(`Auto ${n}: ${precio.error}`);
   item.precio_centavos = precio.centavos;
+  const entrega = limpiarEntrega(a.entrega);
+  if (entrega === false) return falla(`Auto ${n}: el lugar de entrega es muy largo (hasta ${MAXIMO_ENTREGA} letras).`);
+  if (entrega) item.entrega = entrega;
   return { ok: true, item: item as ItemNuevo };
 }
 

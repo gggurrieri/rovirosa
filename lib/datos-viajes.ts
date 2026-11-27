@@ -108,6 +108,8 @@ export type AutoDelViaje = {
   estado_cobro: EstadoCobro;
   vencido: boolean;
   fecha_entrega: string | null;
+  /** "Se entrega en" (null = el destino del viaje). */
+  entrega: string | null;
 };
 
 export type DetalleViaje = {
@@ -128,7 +130,7 @@ export type DetalleViaje = {
 
 export async function obtenerViaje(id: string): Promise<DetalleViaje | null> {
   const supabase = await crearClienteServidor();
-  const [viaje, autos] = await Promise.all([
+  const [viaje, autos, entregas] = await Promise.all([
     supabase
       .from("viajes")
       .select("id, numero, fecha_salida, fecha_llegada_estimada, origen, destino, estado, notas, unidad_id, chofer_id, unidades(nombre), choferes(nombre)")
@@ -139,9 +141,12 @@ export async function obtenerViaje(id: string): Promise<DetalleViaje | null> {
       .select("id, cliente_id, cliente_nombre, vehiculo, moneda, precio_centavos, cobrado_centavos, saldo_centavos, estado_cobro, vencido, fecha_entrega")
       .eq("viaje_id", id)
       .order("cliente_nombre"),
+    supabase.from("items_viaje").select("id, entrega_direccion").eq("viaje_id", id),
   ]);
   if (viaje.error) fallo("el viaje", viaje.error);
   if (autos.error) fallo("los autos del viaje", autos.error);
+  if (entregas.error) fallo("dónde se entrega cada auto", entregas.error);
+  const entregaDe = new Map((entregas.data ?? []).map((e) => [e.id as string, (e.entrega_direccion as string | null) ?? null]));
   if (!viaje.data) return null;
 
   const v = viaje.data;
@@ -170,6 +175,7 @@ export async function obtenerViaje(id: string): Promise<DetalleViaje | null> {
       estado_cobro: a.estado_cobro,
       vencido: a.vencido === true,
       fecha_entrega: a.fecha_entrega,
+      entrega: entregaDe.get(a.id) ?? null,
     })),
   };
 }
@@ -205,6 +211,7 @@ export function viajeOriginal(v: DetalleViaje): ViajeOriginal {
         moneda: a.moneda,
         precio_centavos: a.precio_centavos,
         cobrado_centavos: a.cobrado_centavos,
+        entrega: a.entrega,
       })),
   };
 }

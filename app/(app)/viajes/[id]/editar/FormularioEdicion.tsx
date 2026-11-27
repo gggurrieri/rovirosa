@@ -15,6 +15,7 @@ import {
 } from "@/lib/edicion";
 import { type Anticipo, textoAnticipo } from "@/lib/entregas";
 import { formatearPlata } from "@/lib/formato";
+import { CampoEntrega } from "@/components/CampoEntrega";
 import { avisosDisponibilidad } from "@/lib/viajes";
 import { editarViaje, type EstadoFormulario } from "../../actions";
 import { type AutoUI, autoVacio, TarjetaAuto } from "../../nuevo/FormularioViaje";
@@ -64,6 +65,7 @@ export function FormularioEdicion({
   const [choferId, setChoferId] = useState(inicial.chofer_id);
   const [notas, setNotas] = useState(inicial.notas);
   const [precios, setPrecios] = useState(inicial.precios);
+  const [entregas, setEntregas] = useState(inicial.entregas ?? {});
   const [quitar, setQuitar] = useState<string[]>([]);
   const [anticipos, setAnticipos] = useState<Record<string, Anticipo>>({});
   const [agregar, setAgregar] = useState<AutoUI[]>([]);
@@ -81,15 +83,17 @@ export function FormularioEdicion({
     chofer_id: choferId,
     notas,
     precios,
+    entregas,
     quitar,
     anticipos,
-    agregar: agregar.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio }) => ({
+    agregar: agregar.map(({ cliente_id, cliente_nuevo, vehiculo_id, marca, modelo, precio, entrega }) => ({
       cliente_id,
       cliente_nuevo,
       vehiculo_id,
       marca,
       modelo,
       precio,
+      entrega,
     })),
     motivo,
   };
@@ -254,6 +258,9 @@ export function FormularioEdicion({
                     className={`${campo} max-w-40 text-right text-lg tabular-nums`}
                   />
                 </label>
+              )}
+              {!quitar.includes(a.item_id) && (
+                <CampoEntrega numero={a.nombre} valor={entregas[a.item_id] ?? ""} onCambiar={(t) => setEntregas((x) => ({ ...x, [a.item_id]: t }))} />
               )}
             </div>
           );

@@ -118,6 +118,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261203000000_configuracion.sql` | Configuración desde la app: tarifas, unidades, choferes y empresa (con sus reglas), importar tarifas, rutas sin duplicados, blindaje y mover un usuario de empresa (solo SQL Editor) |
 | `20261204000000_calendario.sql` | Calendario: agenda por rango, bloqueos (service, VTV, francos) que se anulan con motivo y avisan choques |
 | `20261205000000_calendario_google.sql` | Calendario en Google: link personal (token) que se puede regenerar; el feed trae fechas, rutas y unidades, nunca precios ni clientes |
+| `20261206000000_entrega_por_auto.sql` | "Se entrega en" por auto (viajes que dejan autos en varias ciudades): crear y editar viaje lo guardan, y el recordatorio de cobro dice el destino de cada auto. Solo reemplaza funciones |
 
 Para aplicar una (sirve desde el celular):
 

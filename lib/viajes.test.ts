@@ -194,3 +194,14 @@ describe("clientesParecidos", () => {
     expect(clientesParecidos("Ana", clientes)).toEqual([]);
   });
 });
+
+describe("Se entrega en (viajes con varias paradas)", () => {
+  it("cada auto guarda dónde se entrega, limpio; vacío no se manda", () => {
+    const r = armarViaje(borrador({ autos: [auto({ entrega: "  Bariloche,   Río Negro " }), auto({ entrega: "" }), auto()] }));
+    expect(r.ok && r.items.map((i) => i.entrega)).toEqual(["Bariloche, Río Negro", undefined, undefined]);
+  });
+  it("más de 120 letras no", () => {
+    const r = armarViaje(borrador({ autos: [auto({ entrega: "x".repeat(121) })] }));
+    expect(r).toEqual({ ok: false, error: "Auto 1: el lugar de entrega es muy largo (hasta 120 letras)." });
+  });
+});
