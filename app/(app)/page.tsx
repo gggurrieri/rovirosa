@@ -57,11 +57,15 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
         <AvisoAccion sp={sp} mes={mesTexto} />
       </div>
 
+      {/* Celular: una sola columna en este orden (order-*), con "contents" las dos columnas se
+          mezclan: 1) lo que se debe, 2) atrasados y en curso (empezar o terminar un viaje sin
+          bajar), 3) el mes, ¿quién está libre? y para reclamar, 4) próximos.
+          Computadora: dos columnas como siempre (lg:order-none). */}
       {/* Columna izquierda (en la computadora): cómo va el negocio */}
-      <div className="flex flex-col gap-5">
+      <div className="contents lg:flex lg:flex-col lg:gap-5">
         {/* Ahora: lo que se debe hoy. El monto se achica con el ancho de la tarjeta (cqi): en un
             celular angosto o con letra ancha entra igual en un renglón, sin cortar el número. */}
-        <section className="grid grid-cols-2 gap-3">
+        <section className="order-1 grid grid-cols-2 gap-3 lg:order-none">
           <Link
             href="/cobros"
             className="@container min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50"
@@ -86,7 +90,7 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
 
         {/* Resultados del mes */}
         <section
-          className="rounded-2xl bg-white p-4 shadow-sm"
+          className="order-3 rounded-2xl bg-white p-4 shadow-sm lg:order-none"
           aria-label="Resultados del mes"
         >
           <div className="flex items-center justify-between">
@@ -140,14 +144,14 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
 
         <Link
           href="/calendario"
-          className="flex min-h-14 items-center justify-between rounded-2xl bg-white px-4 py-3 text-base font-semibold shadow-sm active:bg-slate-50 lg:hidden"
+          className="order-3 flex min-h-14 items-center justify-between rounded-2xl bg-white px-4 py-3 text-base font-semibold shadow-sm active:bg-slate-50 lg:hidden"
         >
           <span>🚚 ¿Quién está libre?</span>
           <span className="text-sm font-normal text-slate-500">Unidades por día →</span>
         </Link>
 
         {reclamar.length > 0 && (
-          <section aria-label="Para reclamar" className="flex flex-col gap-3">
+          <section aria-label="Para reclamar" className="order-3 flex flex-col gap-3 lg:order-none">
             <h2 className="text-lg font-semibold">Para reclamar</h2>
             <ul className="flex flex-col gap-2">
               {reclamar.map((c) => (
@@ -169,7 +173,7 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
       </div>
 
       {/* Columna derecha (en la computadora): los viajes del día */}
-      <div className="flex flex-col gap-5">
+      <div className="contents lg:flex lg:flex-col lg:gap-5">
         {atrasados.length > 0 && (
           <ListaViajes
             titulo={`Atrasados (${atrasados.length})`}
@@ -177,6 +181,7 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
             viajes={atrasados}
             hoy={hoy}
             mes={mesTexto}
+            clase="order-2 lg:order-none"
           />
         )}
         <ListaViajes
@@ -185,6 +190,8 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
           viajes={enCurso}
           hoy={hoy}
           mes={mesTexto}
+          // Sin viajes en la ruta, el aviso "Ningún viaje" no ocupa el lugar de arriba
+          clase={enCurso.length > 0 ? "order-2 lg:order-none" : "order-4 lg:order-none"}
         />
         <ListaViajes
           titulo={`Próximos 7 días (${proximos.length})`}
@@ -192,6 +199,7 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
           viajes={proximos}
           hoy={hoy}
           mes={mesTexto}
+          clase="order-4 lg:order-none"
         />
       </div>
     </div>
@@ -231,6 +239,7 @@ function ListaViajes({
   mes,
   vacio,
   tono,
+  clase = "",
 }: {
   titulo: string;
   viajes: ViajeHoy[];
@@ -238,9 +247,10 @@ function ListaViajes({
   mes: string | null;
   vacio?: string;
   tono?: "alerta";
+  clase?: string;
 }) {
   return (
-    <section className="flex flex-col gap-3">
+    <section className={`flex flex-col gap-3 ${clase}`}>
       <h2
         className={`text-lg font-semibold ${tono === "alerta" ? "text-amber-800" : ""}`}
       >

@@ -69,7 +69,9 @@ const scrollPara = async (page, selector) => {
   const hayEnCurso = (await page.locator(boton).count()) > 0;
   c.ok(hayEnCurso, "4:00 Inicio muestra el viaje en curso con su botón 'Terminó: entregado'");
   if (hayEnCurso) {
-    informe.push(`Viaje en curso: el botón aparece bajando ${await scrollPara(page, boton)} px`);
+    const sBoton = await scrollPara(page, boton);
+    c.ok(sBoton === 0, `4:00 Inicio: 'Terminó: entregado' se ve al abrir, sin bajar (${sBoton} px)`);
+    informe.push(`Viaje en curso: el botón aparece bajando ${sBoton} px`);
     await page.locator(boton).first().scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${c.CAPTURAS}/ensayo-3-en-curso.png` });
     const t0 = toques;
