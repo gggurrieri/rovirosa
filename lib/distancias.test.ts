@@ -27,11 +27,13 @@ describe("calcularDistancia", () => {
     expect(r).toEqual({ ok: true, km: 1580, origen: "Buenos Aires, CABA, Argentina", destino: "San Carlos de Bariloche, RN, Argentina" });
     const [urlRuta, initRuta] = f.mock.calls[2];
     expect(String(urlRuta)).toBe("https://ors.test/openrouteservice/v2/directions/driving-hgv");
-    expect(JSON.parse(String(initRuta?.body)).coordinates).toEqual([[-58.38, -34.6], [-71.31, -41.13]]);
+    expect(JSON.parse(String(initRuta?.body))).toMatchObject({ coordinates: [[-58.38, -34.6], [-71.31, -41.13]], radiuses: [-1, -1] });
     expect((initRuta?.headers as Record<string, string>).Authorization).toBe("k");
     const geo = new URL(String(f.mock.calls[0][0]));
     expect(geo.pathname).toBe("/pelias/v1/search");
     expect(geo.searchParams.get("boundary.country")).toBe("AR,CL,UY,PY,BO,BR");
+    // Nunca provincias ni partidos enteros: su centro puede quedar lejos de la ciudad y de una ruta
+    expect(geo.searchParams.get("layers")).not.toMatch(/region|county/);
   });
 
   it("avisa qué lugar no encontró", async () => {
@@ -86,6 +88,7 @@ describe("sugerirLugares", () => {
   it("devuelve hasta 5 lugares sin repetir", async () => {
     const f = vi.fn(async (url: RequestInfo | URL) => {
       expect(new URL(String(url)).pathname).toBe("/pelias/v1/autocomplete");
+      expect(new URL(String(url)).searchParams.get("layers")).toBe("locality,localadmin");
       return json(200, { features: [lugar("San Carlos de Bariloche, RN, Argentina", -71.3, -41.1), lugar("San Carlos de Bariloche, RN, Argentina", -71.3, -41.1), lugar("Barilari, BA, Argentina", -60, -35)].map((x) => x.features[0]) });
     });
     expect(await sugerirLugares("Bari", { ...config, fetch: f })).toEqual([

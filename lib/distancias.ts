@@ -14,6 +14,10 @@ export type Lugar = { nombre: string; coordenadas: Coordenadas };
 export type Conocidos = { origen?: Coordenadas | null; destino?: Coordenadas | null };
 
 const PAISES = "AR,CL,UY,PY,BO,BR"; // Argentina y limítrofes
+// Solo ciudades y localidades (y direcciones, al buscar): una provincia o un partido entero no sirve
+// para medir un viaje, porque su "centro" puede quedar a cientos de km de la ciudad y lejos de una ruta.
+const CAPAS_SUGERENCIAS = "locality,localadmin";
+const CAPAS_BUSQUEDA = "locality,localadmin,venue,address";
 const ESPERA_MS = 8000;
 
 class ErrorServicio extends Error {}
@@ -35,7 +39,8 @@ export async function calcularDistancia(origen: string, destino: string, config:
     const r = await pedir(f, `${config.url}/openrouteservice/v2/directions/driving-hgv`, {
       method: "POST",
       headers: { Authorization: config.clave, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ coordinates: [desde!.coordenadas, hasta!.coordenadas], instructions: false }),
+      // radiuses -1: si el punto cae lejos de una calle (localidad chica), se engancha en la ruta más cercana.
+      body: JSON.stringify({ coordinates: [desde!.coordenadas, hasta!.coordenadas], radiuses: [-1, -1], instructions: false }),
     });
     if (r.status === 404 || r.status === 400) return { ok: false, error: "No encontré un camino por ruta entre esos lugares." };
     revisar(r);
@@ -49,7 +54,7 @@ export async function calcularDistancia(origen: string, destino: string, config:
 }
 
 async function buscarLugar(texto: string, config: Config, f: typeof fetch): Promise<Lugar | null> {
-  const q = new URLSearchParams({ text: texto, size: "1", "boundary.country": PAISES, layers: "locality,localadmin,county,region,venue,address" });
+  const q = new URLSearchParams({ text: texto, size: "1", "boundary.country": PAISES, layers: CAPAS_BUSQUEDA });
   const r = await pedir(f, `${config.url}/pelias/v1/search?${q}`, { headers: { Authorization: config.clave, Accept: "application/json" } });
   revisar(r);
   return aLugares(await r.json(), texto)[0] ?? null;
@@ -81,7 +86,7 @@ export async function sugerirLugares(texto: string, config: Config): Promise<Lug
   const t = texto.trim();
   if (t.length < MINIMO_SUGERENCIAS || !config.clave) return [];
   try {
-    const q = new URLSearchParams({ text: t, size: "5", "boundary.country": PAISES, layers: "locality,localadmin,county,region" });
+    const q = new URLSearchParams({ text: t, size: "5", "boundary.country": PAISES, layers: CAPAS_SUGERENCIAS });
     const r = await pedir(config.fetch ?? fetch, `${config.url}/pelias/v1/autocomplete?${q}`, {
       headers: { Authorization: config.clave, Accept: "application/json" },
     });
