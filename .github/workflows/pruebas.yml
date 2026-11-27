@@ -38,6 +38,11 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Librerías sin fallas de seguridad conocidas
+        # Solo las que se publican (no las herramientas de desarrollo), y solo fallas altas o
+        # críticas. Si aparece una: actualizar esa librería (Dependabot suele abrir el PR).
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Lint
         run: npm run lint
 
