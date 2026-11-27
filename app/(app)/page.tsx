@@ -59,24 +59,25 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
 
       {/* Columna izquierda (en la computadora): cómo va el negocio */}
       <div className="flex flex-col gap-5">
-        {/* Ahora: lo que se debe hoy */}
+        {/* Ahora: lo que se debe hoy. El monto se achica con el ancho de la tarjeta (cqi): en un
+            celular angosto o con letra ancha entra igual en un renglón, sin cortar el número. */}
         <section className="grid grid-cols-2 gap-3">
           <Link
             href="/cobros"
-            className="min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50"
+            className="@container min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50"
           >
             <p className="text-sm font-medium text-slate-600">Por cobrar</p>
-            <p className="mt-1 text-lg font-bold wrap-anywhere tabular-nums min-[400px]:text-xl">
+            <p className="mt-1 text-[clamp(0.9rem,11.5cqi,1.25rem)] font-bold wrap-anywhere tabular-nums">
               <Montos montos={porCobrar} />
             </p>
           </Link>
           <Link
             href="/cobros"
-            className={`min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50 ${tieneMonto(vencido) ? "border-l-4 border-red-600" : ""}`}
+            className={`@container min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50 ${tieneMonto(vencido) ? "border-l-4 border-red-600" : ""}`}
           >
             <p className="text-sm font-medium text-slate-600">Vencido</p>
             <p
-              className={`mt-1 text-lg font-bold wrap-anywhere tabular-nums min-[400px]:text-xl ${tieneMonto(vencido) ? "text-red-700" : ""}`}
+              className={`mt-1 text-[clamp(0.9rem,11.5cqi,1.25rem)] font-bold wrap-anywhere tabular-nums ${tieneMonto(vencido) ? "text-red-700" : ""}`}
             >
               <Montos montos={vencido} />
             </p>

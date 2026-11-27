@@ -36,10 +36,16 @@ const scrollPara = async (page, selector) => {
   await c.texto(page);
   const sPorCobrar = await scrollPara(page, "main a:has-text('Por cobrar')");
   c.ok(sPorCobrar === 0, "1:00 Inicio: 'Por cobrar' y 'Vencido' se ven al abrir, sin bajar");
-  // Cada monto en un solo renglón (el "$" no queda separado del número)
-  for (const tarjeta of ["Por cobrar", "Vencido"]) {
-    const alto = await page.locator(`main a:has-text('${tarjeta}') p >> nth=1`).evaluate((p) => p.getBoundingClientRect().height / parseFloat(getComputedStyle(p).lineHeight));
-    c.ok(alto < 1.5, `1:00 Inicio: el monto de '${tarjeta}' entra en un renglón (${alto.toFixed(1)})`);
+  // Cada monto en un solo renglón (el "$" no queda separado del número), también con una letra
+  // ancha (DejaVu Sans, la de la CI; parecida a un Android con letra grande)
+  const renglones = (tarjeta) =>
+    page.locator(`main a:has-text('${tarjeta}') p >> nth=1`).evaluate((p) => p.getBoundingClientRect().height / parseFloat(getComputedStyle(p).lineHeight));
+  for (const letra of ["la del sistema", "una letra ancha"]) {
+    if (letra === "una letra ancha") await page.addStyleTag({ content: 'body, body * { font-family: "DejaVu Sans", Verdana, sans-serif !important; }' });
+    for (const tarjeta of ["Por cobrar", "Vencido"]) {
+      const alto = await renglones(tarjeta);
+      c.ok(alto < 1.5, `1:00 Inicio: el monto de '${tarjeta}' entra en un renglón con ${letra} (${alto.toFixed(1)})`);
+    }
   }
   await page.screenshot({ path: `${c.CAPTURAS}/ensayo-1-inicio.png` });
   informe.push(`Inicio: Por cobrar y Vencido a la vista (bajar ${sPorCobrar} px)`);
