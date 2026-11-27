@@ -47,6 +47,13 @@ const bmw = c.sql(`select i.id from public.items_viaje i join public.vehiculos v
   c.ok((await page.inputValue("input[aria-label=Destino]")) === "San Carlos de Bariloche, RN, Argentina", "Nuevo viaje: el destino sugiere ciudades del mapa");
   c.ok(await c.sinScrollHorizontal(page), "Nuevo viaje sin scroll horizontal a 375 px");
 
+  // Con el teclado abierto (un campo con foco) la barra de abajo no tapa el formulario
+  const barra = page.locator("[data-barra-inferior]");
+  await page.locator("input[aria-label='Se entrega en, auto 1']").focus();
+  c.ok(!(await barra.isVisible()), "Mientras se escribe, la barra de abajo se oculta (no tapa Guardar)");
+  await page.locator("input[aria-label='Se entrega en, auto 1']").blur();
+  c.ok(await barra.isVisible(), "Al dejar de escribir, la barra vuelve");
+
   c.ok(page.errores.length === 0, `Sin errores de JavaScript ${page.errores.join(" ")}`);
   await navegador.close();
   c.terminar();
