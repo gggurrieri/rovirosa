@@ -32,6 +32,9 @@ declare
   v_clientes uuid[];
   v_marcas   text[] := array['Porsche 911', 'Ferrari Roma', 'BMW M4', 'Audi R8', 'Mercedes AMG GT', 'Ford Mustang', 'Toyota GR86', 'Chevrolet Camaro'];
   v_total    int := 0;
+  -- El sistema arranca hace 2 meses: lo atrasado de antes se termina de cobrar ese mes
+  -- (es lo "recuperado"); desde el mes siguiente, solo cobros rápidos.
+  v_corte    date := (date_trunc('month', public.hoy_ar()) - make_interval(months => 1))::date - 1;
 begin
   if not exists (select 1 from public.empresas where id = v_empresa and nombre like '%(demo)%') then
     raise notice 'No hay empresa demo: no se cargó nada.';
@@ -63,7 +66,8 @@ begin
       returning id into v_viaje;
 
       for v_n in 1..v_autos loop
-        v_r := abs(hashtext(v_viaje::text || v_n));
+        -- Con mes, viaje y auto (no con el id, que es al azar): la historia sale igual cada vez.
+        v_r := abs(hashtext(v_mes::text || '-' || v_k || '-' || v_n));
         v_cliente := v_clientes[1 + v_r % array_length(v_clientes, 1)];
         insert into public.vehiculos (empresa_id, cliente_id, marca, modelo)
         values (v_empresa, v_cliente, split_part(v_marcas[1 + (v_r / 5) % 8], ' ', 1),
@@ -74,7 +78,7 @@ begin
         returning id into v_item;
 
         -- Antes del sistema (hace 3 a 5 meses) se cobraba tarde; después, rápido.
-        v_demora := case when v_atras >= 3 then 20 + (v_r / 17) % 45 else 2 + (v_r / 17) % 12 end;
+        v_demora := case when v_atras >= 3 then least(20 + (v_r / 17) % 45, v_corte - v_entrega) else 2 + (v_r / 17) % 12 end;
         continue when v_r % 10 = 0;                          -- 1 de cada 10 autos queda sin cobrar
         continue when v_entrega + v_demora > v_hoy;          -- todavía no pagó
         v_monto := case when v_r % 7 = 0 then v_tarifa.precio_base_centavos / 2 else v_tarifa.precio_base_centavos end;
