@@ -25,7 +25,7 @@ describe("invitación por WhatsApp", () => {
   it("arma el mensaje con el email y el link de registro", () => {
     const texto = mensajeInvitacion({ nombre: "Laura", email: "laura@demo.com", empresa: "Rovirosa", url: "https://rovirosa-demo.netlify.app/registro" });
     expect(texto).toBe(
-      "Hola Laura, te invité a usar el sistema de Rovirosa. Creá tu usuario con el email laura@demo.com en https://rovirosa-demo.netlify.app/registro (la invitación vence en 7 días).",
+      "Hola Laura, te invité a usar Tracker, el sistema de Rovirosa. Creá tu usuario con el email laura@demo.com en https://rovirosa-demo.netlify.app/registro (la invitación vence en 7 días).",
     );
   });
 

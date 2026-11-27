@@ -63,20 +63,20 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
         <section className="grid grid-cols-2 gap-3">
           <Link
             href="/cobros"
-            className="rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50"
+            className="min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50"
           >
             <p className="text-sm font-medium text-slate-600">Por cobrar</p>
-            <p className="mt-1 text-xl font-bold tabular-nums">
+            <p className="mt-1 text-xl font-bold wrap-anywhere tabular-nums">
               <Montos montos={porCobrar} />
             </p>
           </Link>
           <Link
             href="/cobros"
-            className={`rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50 ${tieneMonto(vencido) ? "border-l-4 border-red-600" : ""}`}
+            className={`min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50 ${tieneMonto(vencido) ? "border-l-4 border-red-600" : ""}`}
           >
             <p className="text-sm font-medium text-slate-600">Vencido</p>
             <p
-              className={`mt-1 text-xl font-bold tabular-nums ${tieneMonto(vencido) ? "text-red-700" : ""}`}
+              className={`mt-1 text-xl font-bold wrap-anywhere tabular-nums ${tieneMonto(vencido) ? "text-red-700" : ""}`}
             >
               <Montos montos={vencido} />
             </p>

@@ -5,7 +5,7 @@ import { Encabezado } from "../../componentes";
 import { textoProximos } from "../../proximos";
 import { FormularioChofer } from "./FormularioChofer";
 
-export const metadata: Metadata = { title: "Chofer · Rovirosa" };
+export const metadata: Metadata = { title: "Chofer · Tracker" };
 
 export default async function Chofer({ params }: PageProps<"/configuracion/choferes/[id]">) {
   const { id } = await params;

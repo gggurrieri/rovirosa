@@ -50,6 +50,9 @@ jobs:
       - name: Pruebas de la base (SQL)
         run: npm run test:sql
 
+      - name: El backup se puede restaurar
+        run: bash scripts/backup/probar-restauracion.sh
+
       - name: Instalar navegador para las pruebas de punta a punta
         run: npx playwright install --with-deps chromium
 

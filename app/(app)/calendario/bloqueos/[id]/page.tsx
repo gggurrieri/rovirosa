@@ -6,7 +6,7 @@ import { obtenerBloqueo } from "@/lib/datos-calendario";
 import { formatearFecha } from "@/lib/formato";
 import { FormularioAnular } from "./FormularioAnular";
 
-export const metadata: Metadata = { title: "Bloqueo · Rovirosa" };
+export const metadata: Metadata = { title: "Bloqueo · Tracker" };
 
 export default async function Bloqueo({ params }: PageProps<"/calendario/bloqueos/[id]">) {
   const { id } = await params;

@@ -16,7 +16,7 @@ import { AccionesEstado } from "./AccionesEstado";
 import { CancelarViaje } from "./CancelarViaje";
 import { EntregaAuto } from "./EntregaAuto";
 
-export const metadata: Metadata = { title: "Viaje · Rovirosa" };
+export const metadata: Metadata = { title: "Viaje · Tracker" };
 
 const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -81,7 +81,7 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
         <p className="mt-1 text-base text-slate-600">
           {viaje.unidad ?? "Sin unidad"} · {viaje.chofer ?? "sin chofer"}
         </p>
-        {viaje.notas && <p className="mt-3 text-base whitespace-pre-line text-slate-700">{viaje.notas}</p>}
+        {viaje.notas && <p className="mt-3 text-base wrap-anywhere whitespace-pre-line text-slate-700">{viaje.notas}</p>}
         <Link
           href={`/viajes/${viaje.id}/editar`}
           className="mt-4 flex h-12 items-center justify-center rounded-xl border border-slate-300 text-base font-medium text-slate-800 active:bg-slate-50 lg:inline-flex lg:h-11 lg:px-6"

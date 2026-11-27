@@ -1,0 +1,23 @@
+# Mantiene activo el proyecto de Supabase: el plan gratis lo pausa tras 7 días sin uso.
+# Cada 3 días hace una consulta mínima. Si falla, GitHub te avisa por email.
+name: Supabase activo
+
+on:
+  schedule:
+    - cron: "17 12 */3 * *" # cada 3 días, 09:17 de Argentina
+  workflow_dispatch: # para correrlo a mano desde la pestaña Actions
+
+jobs:
+  consulta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Consulta mínima a la base
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Falta el secret SUPABASE_DB_URL. Cargalo siguiendo docs/backups.md (paso 1)."
+            exit 1
+          fi
+          psql "$SUPABASE_DB_URL" -tAc "select 'Supabase activo: ' || count(*) || ' empresas' from public.empresas"

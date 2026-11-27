@@ -7,7 +7,7 @@ import { obtenerMetricas } from "@/lib/datos-metricas";
 import { formatearPlata } from "@/lib/formato";
 import { formatearPlataCorta, NOMBRE_TRAMO, nombreMes } from "@/lib/metricas";
 
-export const metadata: Metadata = { title: "Métricas · Rovirosa" };
+export const metadata: Metadata = { title: "Métricas · Tracker" };
 
 // Paleta validada (ver la skill de visualización): azul y naranja se distinguen
 // también con daltonismo. El naranja tiene poco contraste sobre blanco: por eso
@@ -57,7 +57,7 @@ export default async function Metricas() {
             </p>
           )}
 
-          <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
             <Tarjeta titulo="Recuperado por mes" ayuda="Plata que entró de autos que ya estaban vencidos: lo que se rescató.">
               <Columnas
                 categorias={meses}
@@ -144,9 +144,9 @@ export default async function Metricas() {
 
 function Tile({ titulo, valor, nota, destacado = false }: { titulo: string; valor: string; nota?: string; destacado?: boolean }) {
   return (
-    <div className={`rounded-2xl p-4 shadow-sm ${destacado ? "col-span-2 bg-sky-700 text-white lg:col-span-1" : "bg-white"}`}>
+    <div className={`min-w-0 rounded-2xl p-4 shadow-sm ${destacado ? "col-span-2 bg-sky-700 text-white lg:col-span-1" : "bg-white"}`}>
       <p className={`text-sm font-medium ${destacado ? "text-sky-100" : "text-slate-600"}`}>{titulo}</p>
-      <p className={`mt-1 font-bold tabular-nums ${destacado ? "text-3xl" : "text-xl"}`}>{valor}</p>
+      <p className={`mt-1 font-bold wrap-anywhere tabular-nums ${destacado ? "text-3xl" : "text-xl"}`}>{valor}</p>
       {nota && <p className={`mt-1 text-xs ${destacado ? "text-sky-100" : "text-slate-500"}`}>{nota}</p>}
     </div>
   );

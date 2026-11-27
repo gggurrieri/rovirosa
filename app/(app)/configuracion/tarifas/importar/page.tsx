@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Encabezado } from "../../componentes";
 import { Importador } from "./Importador";
 
-export const metadata: Metadata = { title: "Importar tarifas · Rovirosa" };
+export const metadata: Metadata = { title: "Importar tarifas · Tracker" };
 
 export default function ImportarTarifas() {
   return (

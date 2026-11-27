@@ -1,4 +1,6 @@
-# Rovirosa · Sistema de gestión para transporte de autos
+# Tracker · Sistema de gestión para transportistas de autos
+
+Primer cliente: Rovirosa (José C. Paz). El repositorio y el sitio de Netlify conservan el nombre `rovirosa`.
 
 App web (Next.js + Supabase) para registrar viajes y cobros, pensada para usar desde el celular.
 
@@ -76,6 +78,14 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 2. Netlify lee `netlify.toml` (comando `npm run build`, Node 22). No hace falta tocar nada más.
 3. En **Site configuration → Environment variables** cargá `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 4. **Deploy**. Abrí la URL que te da Netlify desde el celular.
+
+## Backups y Supabase activo
+
+Un backup semanal encriptado y una consulta cada 3 días para que el plan gratis no pause el proyecto, con tareas automáticas de GitHub. Configuración (dos secrets, una sola vez) y cómo restaurar: [docs/backups.md](docs/backups.md).
+
+## App instalable
+
+Desde el celular: **Más → Instalá la app** (Android: un botón; iPhone: Compartir → Agregar a inicio). Los íconos salen de `scripts/generar-iconos.mjs`. El service worker (`public/sw.js`) solo muestra "Sin conexión" cuando no hay señal: no guarda datos.
 
 ## Aplicar una migración nueva en Supabase
 

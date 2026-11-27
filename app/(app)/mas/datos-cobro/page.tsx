@@ -4,7 +4,7 @@ import { obtenerSesion } from "@/lib/datos";
 import { obtenerDatosCobro } from "@/lib/datos-clientes";
 import { FormularioDatosCobro } from "./FormularioDatosCobro";
 
-export const metadata: Metadata = { title: "Datos para cobrar · Rovirosa" };
+export const metadata: Metadata = { title: "Datos para cobrar · Tracker" };
 
 export default async function DatosCobro({ searchParams }: PageProps<"/mas/datos-cobro">) {
   const { perfil } = await obtenerSesion();

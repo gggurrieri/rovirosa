@@ -1,9 +1,11 @@
-# Rovirosa · Sistema de gestión para transporte de autos
+# Tracker · Sistema de gestión para transportistas de autos
 
 Este archivo le da contexto a Claude Code. Leelo completo antes de cada tarea.
 La especificación funcional completa está en `docs/especificacion.md`.
 
 ## Qué es
+
+**Tracker** es el nombre del producto (en la interfaz, títulos, íconos y mensajes). Rovirosa es el primer cliente: su nombre aparece solo como nombre de empresa (dato), nunca como nombre de la herramienta.
 
 Sistema para Rovirosa, una transportista de autos de alto valor (carrera, 0 km, colección; hasta USD 250.000) de José C. Paz, Buenos Aires. Tiene 2 camiones mosquito, 1 camioneta con carro, 2 choferes empleados, y el dueño (Rodrigo) maneja la camioneta. Hace unos 15 viajes por mes por Argentina y países limítrofes.
 

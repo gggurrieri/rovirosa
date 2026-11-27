@@ -9,8 +9,10 @@ const RUTAS_PUBLICAS = ["/login", "/registro", "/auth/confirmar"];
  * cookies nuevas) y redirige a /login si no hay usuario.
  */
 export async function actualizarSesion(request: NextRequest) {
-  // El link del calendario lo piden Google, el iPhone u Outlook, sin sesión: ni login ni cookies.
-  if (request.nextUrl.pathname.startsWith("/ics/")) return NextResponse.next();
+  // Sin login ni cookies: el link del calendario (lo piden Google, el iPhone u Outlook) y la
+  // página "Sin conexión" (la guarda el service worker y no puede ser una redirección).
+  const ruta = request.nextUrl.pathname;
+  if (ruta.startsWith("/ics/") || ruta === "/sin-conexion") return NextResponse.next();
   const { url, anonKey } = configSupabase();
   let respuesta = NextResponse.next({ request });
 
@@ -33,7 +35,6 @@ export async function actualizarSesion(request: NextRequest) {
   // getClaims valida el token; no confiar en getSession() del lado del servidor.
   const { data } = await supabase.auth.getClaims();
   const hayUsuario = Boolean(data?.claims?.sub);
-  const ruta = request.nextUrl.pathname;
   const esPublica = RUTAS_PUBLICAS.some((r) => ruta === r || ruta.startsWith(`${r}/`));
 
   if (!hayUsuario && !esPublica) {

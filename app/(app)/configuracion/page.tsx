@@ -3,7 +3,7 @@ import Link from "next/link";
 import { obtenerSesion } from "@/lib/datos";
 import { obtenerChoferesConfig, obtenerEmpresaConfig, obtenerTarifasConfig, obtenerUnidadesConfig } from "@/lib/datos-configuracion";
 
-export const metadata: Metadata = { title: "Configuración · Rovirosa" };
+export const metadata: Metadata = { title: "Configuración · Tracker" };
 
 export default async function Configuracion() {
   const [{ perfil }, tarifas, unidades, choferes, empresa] = await Promise.all([

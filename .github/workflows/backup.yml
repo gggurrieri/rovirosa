@@ -1,0 +1,54 @@
+# Backup semanal de los datos, encriptado con contraseña (tiene nombres y DNI: Ley 25.326).
+# Queda como archivo descargable de esta tarea durante 90 días. Cómo restaurarlo: docs/backups.md
+name: Backup semanal
+
+on:
+  schedule:
+    - cron: "41 6 * * 0" # domingos 03:41 de Argentina
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Revisar que estén los secrets
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          falta=0
+          [ -n "$SUPABASE_DB_URL" ] || { echo "::error::Falta el secret SUPABASE_DB_URL (docs/backups.md, paso 1)."; falta=1; }
+          [ -n "$BACKUP_PASSWORD" ] || { echo "::error::Falta el secret BACKUP_PASSWORD (docs/backups.md, paso 1)."; falta=1; }
+          exit $falta
+
+      - name: Instalar pg_dump 17 (sirve para Postgres 15, 16 y 17)
+        run: |
+          sudo apt-get install -y -qq postgresql-common >/dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y -qq postgresql-client-17 >/dev/null
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Hacer el backup y encriptarlo
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          fecha=$(TZ=America/Argentina/Buenos_Aires date +%Y-%m-%d)
+          mkdir -p "$RUNNER_TEMP/backup"
+          scripts/backup/hacer-backup.sh "$SUPABASE_DB_URL" "$RUNNER_TEMP/datos.sql"
+          echo "$BACKUP_PASSWORD" | gpg --batch --quiet --yes --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 -o "$RUNNER_TEMP/backup/tracker-$fecha.sql.gpg" "$RUNNER_TEMP/datos.sql"
+          rm "$RUNNER_TEMP/datos.sql" # el archivo sin encriptar no sale de acá
+          echo "FECHA=$fecha" >> "$GITHUB_ENV"
+          ls -l "$RUNNER_TEMP/backup"
+
+      - name: Guardar el backup (90 días)
+        uses: actions/upload-artifact@v5
+        with:
+          name: backup-${{ env.FECHA }}
+          path: ${{ runner.temp }}/backup
+          retention-days: 90
+          if-no-files-found: error

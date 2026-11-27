@@ -65,7 +65,7 @@ export function generarICS(d: { empresa: string; viajes: ViajeICS[]; bloqueos: B
   const renglones = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Rovirosa//Calendario de viajes//ES",
+    "PRODID:-//Tracker//Calendario de viajes//ES",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${escaparICS(`${d.empresa} · Viajes`)}`,
@@ -74,6 +74,8 @@ export function generarICS(d: { empresa: string; viajes: ViajeICS[]; bloqueos: B
     "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
     "X-PUBLISHED-TTL:PT1H",
   ];
+  // Los UID no cambian nunca (aunque cambie el nombre del producto): si cambiaran,
+  // los calendarios ya suscritos mostrarían cada viaje duplicado.
   for (const v of d.viajes) {
     const url = `${d.urlBase}/viajes/${v.id}`;
     renglones.push(

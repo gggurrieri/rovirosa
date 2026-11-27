@@ -3,7 +3,7 @@ import Link from "next/link";
 import { obtenerClientes, obtenerPagosConSaldo, obtenerPendientes } from "@/lib/datos-cobros";
 import { FormularioUsar } from "./FormularioUsar";
 
-export const metadata: Metadata = { title: "Usar saldo a favor · Rovirosa" };
+export const metadata: Metadata = { title: "Usar saldo a favor · Tracker" };
 
 const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

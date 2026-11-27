@@ -26,7 +26,7 @@ export function textoVence(venceEn: string, ahora: Date = new Date()): string {
 }
 
 export function mensajeInvitacion(d: { nombre: string; email: string; empresa: string; url: string }): string {
-  return `Hola ${d.nombre}, te invité a usar el sistema de ${d.empresa}. Creá tu usuario con el email ${d.email} en ${d.url} (la invitación vence en 7 días).`;
+  return `Hola ${d.nombre}, te invité a usar Tracker, el sistema de ${d.empresa}. Creá tu usuario con el email ${d.email} en ${d.url} (la invitación vence en 7 días).`;
 }
 
 /** Link para abrir WhatsApp con el texto escrito; sin número, la persona elige el contacto. */

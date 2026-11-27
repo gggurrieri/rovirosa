@@ -9,7 +9,7 @@ import {
 } from "@/lib/datos-cobros";
 import { formatearFecha, formatearPlata } from "@/lib/formato";
 
-export const metadata: Metadata = { title: "Cobros · Rovirosa" };
+export const metadata: Metadata = { title: "Cobros · Tracker" };
 
 const tieneMonto = (m: Record<string, number | undefined>) =>
   Object.values(m).some((v) => (v ?? 0) > 0);

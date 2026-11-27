@@ -8,7 +8,7 @@ import { type FilaGrilla, type FiltrosViajes as Filtros, filtrosAURL, filtrosDes
 import type { Montos as TipoMontos } from "@/lib/tablero";
 import { FiltrosViajes } from "./FiltrosViajes";
 
-export const metadata: Metadata = { title: "Viajes · Rovirosa" };
+export const metadata: Metadata = { title: "Viajes · Tracker" };
 
 const POR_PAGINA = 50;
 

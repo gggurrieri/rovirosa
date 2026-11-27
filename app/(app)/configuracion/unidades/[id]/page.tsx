@@ -5,7 +5,7 @@ import { Encabezado } from "../../componentes";
 import { textoProximos } from "../../proximos";
 import { FormularioUnidad } from "./FormularioUnidad";
 
-export const metadata: Metadata = { title: "Unidad · Rovirosa" };
+export const metadata: Metadata = { title: "Unidad · Tracker" };
 
 export default async function Unidad({ params }: PageProps<"/configuracion/unidades/[id]">) {
   const { id } = await params;

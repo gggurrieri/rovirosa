@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FormularioRegistro } from "./FormularioRegistro";
 
-export const metadata: Metadata = { title: "Crear usuario · Rovirosa" };
+export const metadata: Metadata = { title: "Crear usuario · Tracker" };
 
 export default function PaginaRegistro() {
   return (

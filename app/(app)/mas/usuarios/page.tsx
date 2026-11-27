@@ -8,7 +8,7 @@ import { anularInvitacion, cambiarActivo } from "./actions";
 import { BotonAccion } from "./BotonAccion";
 import { FormularioInvitar } from "./FormularioInvitar";
 
-export const metadata: Metadata = { title: "Usuarios · Rovirosa" };
+export const metadata: Metadata = { title: "Usuarios · Tracker" };
 
 const HECHO: Record<string, string> = {
   anulada: "Invitación anulada.",
