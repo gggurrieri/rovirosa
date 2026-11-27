@@ -25,7 +25,7 @@ liberar
 echo "▶ Compilando la app contra el Supabase simulado"
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:$PUERTO_SIMULADO" NEXT_PUBLIC_SUPABASE_ANON_KEY="clave-de-prueba" \
   npx next build >"$CAPTURAS/build.log" 2>&1 || { tail -30 "$CAPTURAS/build.log"; exit 1; }
-npx next start -p "$PUERTO_APP" >"$CAPTURAS/app.log" 2>&1 &
+ORS_API_KEY="clave-ors-prueba" ORS_URL="http://127.0.0.1:$PUERTO_SIMULADO/ors" npx next start -p "$PUERTO_APP" >"$CAPTURAS/app.log" 2>&1 &
 APP_PID=$!
 for _ in $(seq 1 60); do curl -s -o /dev/null "http://localhost:$PUERTO_APP/login" && break; sleep 0.5; done
 

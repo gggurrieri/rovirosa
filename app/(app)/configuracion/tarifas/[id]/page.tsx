@@ -8,11 +8,13 @@ export const metadata: Metadata = { title: "Tarifa · Tracker" };
 
 export default async function Tarifa({ params }: PageProps<"/configuracion/tarifas/[id]">) {
   const { id } = await params;
-  const tarifa = id === "nueva" ? null : ((await obtenerTarifasConfig()).find((t) => t.id === id) ?? notFound());
+  const tarifas = await obtenerTarifasConfig();
+  const tarifa = id === "nueva" ? null : (tarifas.find((t) => t.id === id) ?? notFound());
+  const lugaresUsados = [...new Set(tarifas.flatMap((t) => [t.origen, t.destino]))];
   return (
     <div className="flex flex-col gap-4 lg:max-w-xl">
       <Encabezado volver={{ href: "/configuracion/tarifas", texto: "Tarifas" }} titulo={tarifa ? `${tarifa.origen} → ${tarifa.destino}` : "Nueva tarifa"} />
-      <FormularioTarifa tarifa={tarifa} />
+      <FormularioTarifa tarifa={tarifa} calculoAutomatico={Boolean(process.env.ORS_API_KEY)} lugaresUsados={lugaresUsados} />
     </div>
   );
 }
