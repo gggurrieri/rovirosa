@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BotonCerrarSesion } from "@/components/BotonCerrarSesion";
+import { EnlaceInstalar } from "@/components/EnlaceInstalar";
 import { obtenerSesion } from "@/lib/datos";
 import { NOMBRE_ROL } from "@/lib/usuarios";
 
-export const metadata: Metadata = { title: "Más · Rovirosa" };
+export const metadata: Metadata = { title: "Más · Tracker" };
 
 export default async function Mas() {
   const { email, perfil } = await obtenerSesion();
@@ -17,6 +18,7 @@ export default async function Mas() {
         <p className="text-base break-all text-slate-600">{email}</p>
         {perfil && <p className="text-sm text-slate-500">{NOMBRE_ROL[perfil.rol]}</p>}
       </section>
+      <EnlaceInstalar />
       {perfil && (
         <Link
           href="/clientes"

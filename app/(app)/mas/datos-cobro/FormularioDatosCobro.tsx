@@ -23,7 +23,7 @@ export function FormularioDatosCobro({ empresa, datos, mensaje }: { empresa: str
           onChange={(e) => setD(e.target.value)}
           maxLength={500}
           rows={4}
-          placeholder={"Alias: rovirosa.cobros\nCBU: 0000000000000000000000\nTitular: Rodrigo Rovirosa"}
+          placeholder={"Alias: tu.alias.cobros\nCBU: 0000000000000000000000\nTitular: Nombre y apellido"}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"
         />
       </label>
@@ -37,7 +37,7 @@ export function FormularioDatosCobro({ empresa, datos, mensaje }: { empresa: str
       </details>
       <section aria-label="Vista previa" className="rounded-2xl bg-emerald-50 p-4">
         <p className="text-sm font-medium text-emerald-900">Así le llega al cliente:</p>
-        <p className="mt-2 text-base whitespace-pre-line text-slate-800">{vista}</p>
+        <p className="mt-2 text-base wrap-anywhere whitespace-pre-line text-slate-800">{vista}</p>
       </section>
       {estado.error && (
         <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-base text-red-800">

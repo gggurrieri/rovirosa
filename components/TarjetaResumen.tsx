@@ -20,7 +20,7 @@ export function TarjetaResumen({
     >
       <h2 className="text-base font-medium text-slate-600">{titulo}</h2>
       <p
-        className={`mt-1 text-3xl font-bold tabular-nums ${tono === "alerta" ? "text-red-700" : "text-slate-900"}`}
+        className={`mt-1 text-3xl font-bold wrap-anywhere tabular-nums ${tono === "alerta" ? "text-red-700" : "text-slate-900"}`}
       >
         {valor}
       </p>

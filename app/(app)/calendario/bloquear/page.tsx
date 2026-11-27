@@ -4,7 +4,7 @@ import { obtenerAgenda } from "@/lib/datos-calendario";
 import { hoyEnArgentina } from "@/lib/formato";
 import { FormularioBloqueo } from "./FormularioBloqueo";
 
-export const metadata: Metadata = { title: "Bloquear · Rovirosa" };
+export const metadata: Metadata = { title: "Bloquear · Tracker" };
 
 export default async function Bloquear({ searchParams }: PageProps<"/calendario/bloquear">) {
   const sp = await searchParams;

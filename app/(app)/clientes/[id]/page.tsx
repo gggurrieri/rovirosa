@@ -10,7 +10,7 @@ import { haceCuanto } from "@/lib/recordatorio";
 import { tieneMonto } from "@/lib/tablero";
 import { FormularioCliente } from "./FormularioCliente";
 
-export const metadata: Metadata = { title: "Cliente · Rovirosa" };
+export const metadata: Metadata = { title: "Cliente · Tracker" };
 
 const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const COBRO: Record<string, string> = { pendiente: "Pendiente", parcial: "Parcial", pagado: "Pagado", cancelado: "Cancelado" };

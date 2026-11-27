@@ -5,7 +5,7 @@ import { obtenerPago } from "@/lib/datos-cobros";
 import { formatearFecha, formatearPlata } from "@/lib/formato";
 import { FormularioAnular } from "./FormularioAnular";
 
-export const metadata: Metadata = { title: "Anular pago · Rovirosa" };
+export const metadata: Metadata = { title: "Anular pago · Tracker" };
 
 const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

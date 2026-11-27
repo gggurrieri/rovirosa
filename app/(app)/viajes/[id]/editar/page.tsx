@@ -5,7 +5,7 @@ import { ChipEstado } from "@/components/ChipEstado";
 import { obtenerOpcionesViaje, obtenerVersionViaje, obtenerViaje, viajeOriginal } from "@/lib/datos-viajes";
 import { FormularioEdicion } from "./FormularioEdicion";
 
-export const metadata: Metadata = { title: "Editar viaje · Rovirosa" };
+export const metadata: Metadata = { title: "Editar viaje · Tracker" };
 
 const ES_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

@@ -5,7 +5,7 @@ import { obtenerAgenda } from "@/lib/datos-calendario";
 import { formatearFecha, hoyEnArgentina, sumarDias } from "@/lib/formato";
 import { Grilla } from "./Grilla";
 
-export const metadata: Metadata = { title: "Calendario · Rovirosa" };
+export const metadata: Metadata = { title: "Calendario · Tracker" };
 
 const FECHA = /^\d{4}-\d{2}-\d{2}$/;
 const corta = (f: string) => formatearFecha(f).slice(0, 5);

@@ -3,7 +3,7 @@ import { obtenerOpcionesViaje } from "@/lib/datos-viajes";
 import { hoyEnArgentina } from "@/lib/formato";
 import { FormularioViaje } from "./FormularioViaje";
 
-export const metadata: Metadata = { title: "Nuevo viaje · Rovirosa" };
+export const metadata: Metadata = { title: "Nuevo viaje · Tracker" };
 
 export default async function NuevoViaje({ searchParams }: PageProps<"/viajes/nuevo">) {
   const { unidad, fecha } = await searchParams;

@@ -5,7 +5,7 @@ import { crearClienteServidor } from "@/lib/supabase/server";
 import { urlBase } from "@/lib/url-base";
 import { CopiarLink, RegenerarLink } from "./BotonesLink";
 
-export const metadata: Metadata = { title: "Calendario en Google · Rovirosa" };
+export const metadata: Metadata = { title: "Calendario en Google · Tracker" };
 
 export default async function CalendarioGoogle({ searchParams }: PageProps<"/mas/calendario-google">) {
   const { perfil } = await obtenerSesion();

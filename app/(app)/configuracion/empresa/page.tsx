@@ -3,7 +3,7 @@ import { obtenerEmpresaConfig } from "@/lib/datos-configuracion";
 import { Aviso, Encabezado } from "../componentes";
 import { FormularioEmpresa } from "./FormularioEmpresa";
 
-export const metadata: Metadata = { title: "Empresa · Rovirosa" };
+export const metadata: Metadata = { title: "Empresa · Tracker" };
 
 export default async function Empresa({ searchParams }: PageProps<"/configuracion/empresa">) {
   const { guardada } = await searchParams;

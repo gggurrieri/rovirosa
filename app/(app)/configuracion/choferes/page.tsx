@@ -4,7 +4,7 @@ import { obtenerChoferesConfig } from "@/lib/datos-configuracion";
 import { Aviso, BotonNuevo, Encabezado, Inactivo } from "../componentes";
 import { textoProximos } from "../proximos";
 
-export const metadata: Metadata = { title: "Choferes · Rovirosa" };
+export const metadata: Metadata = { title: "Choferes · Tracker" };
 
 export default async function Choferes({ searchParams }: PageProps<"/configuracion/choferes">) {
   const { guardado } = await searchParams;

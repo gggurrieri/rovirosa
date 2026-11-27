@@ -4,7 +4,7 @@ import { obtenerTarifasConfig } from "@/lib/datos-configuracion";
 import { formatearPlata } from "@/lib/formato";
 import { Aviso, BotonNuevo, Encabezado, Inactivo } from "../componentes";
 
-export const metadata: Metadata = { title: "Tarifas · Rovirosa" };
+export const metadata: Metadata = { title: "Tarifas · Tracker" };
 
 export default async function Tarifas({ searchParams }: PageProps<"/configuracion/tarifas">) {
   const { guardada, creadas, actualizadas } = await searchParams;

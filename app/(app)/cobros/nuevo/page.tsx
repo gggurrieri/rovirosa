@@ -3,7 +3,7 @@ import { obtenerClientes, obtenerPendientes } from "@/lib/datos-cobros";
 import { hoyEnArgentina } from "@/lib/formato";
 import { FormularioPago } from "./FormularioPago";
 
-export const metadata: Metadata = { title: "Registrar pago · Rovirosa" };
+export const metadata: Metadata = { title: "Registrar pago · Tracker" };
 
 export default async function NuevoPago({ searchParams }: PageProps<"/cobros/nuevo">) {
   const { cliente } = await searchParams;

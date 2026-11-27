@@ -4,7 +4,7 @@ import { obtenerUnidadesConfig } from "@/lib/datos-configuracion";
 import { Aviso, BotonNuevo, Encabezado, Inactivo } from "../componentes";
 import { textoProximos } from "../proximos";
 
-export const metadata: Metadata = { title: "Unidades · Rovirosa" };
+export const metadata: Metadata = { title: "Unidades · Tracker" };
 const NOMBRE_TIPO = { mosquito: "Mosquito", camioneta_carro: "Camioneta con carro", otro: "Otro" } as const;
 
 export default async function Unidades({ searchParams }: PageProps<"/configuracion/unidades">) {

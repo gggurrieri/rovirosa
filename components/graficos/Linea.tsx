@@ -34,7 +34,7 @@ export function Linea({
 
   return (
     <figure role="img" aria-label={etiqueta} className="flex gap-2">
-      <div className="relative h-36 w-14 shrink-0 text-right text-xs text-slate-500 tabular-nums" aria-hidden="true">
+      <div className="relative h-36 w-16 shrink-0 text-right text-xs whitespace-nowrap text-slate-500 tabular-nums" aria-hidden="true">
         {marcas.map((m) => (
           <span key={m} className="absolute right-0" style={{ bottom: `${(m / tope) * 100}%`, transform: "translateY(50%)" }}>
             {m}

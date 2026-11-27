@@ -4,7 +4,7 @@ import { obtenerTarifasConfig } from "@/lib/datos-configuracion";
 import { Encabezado } from "../../componentes";
 import { FormularioTarifa } from "./FormularioTarifa";
 
-export const metadata: Metadata = { title: "Tarifa · Rovirosa" };
+export const metadata: Metadata = { title: "Tarifa · Tracker" };
 
 export default async function Tarifa({ params }: PageProps<"/configuracion/tarifas/[id]">) {
   const { id } = await params;

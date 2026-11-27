@@ -9,7 +9,7 @@ import { SinAcceso } from "./SinAcceso";
  */
 export default async function LayoutAutenticado({ children }: LayoutProps<"/">) {
   const { email, perfil, acceso } = await obtenerSesion();
-  const empresa = perfil?.empresa || "Rovirosa";
+  const empresa = perfil?.empresa || "Tracker";
 
   return (
     <div className="min-h-dvh pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0 lg:pl-60">

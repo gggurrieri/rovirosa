@@ -6,7 +6,7 @@ import { formatearFecha } from "@/lib/formato";
 import { haceCuanto, posiblesDuplicados } from "@/lib/recordatorio";
 import { tieneMonto } from "@/lib/tablero";
 
-export const metadata: Metadata = { title: "Clientes · Rovirosa" };
+export const metadata: Metadata = { title: "Clientes · Tracker" };
 
 const normalizar = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
