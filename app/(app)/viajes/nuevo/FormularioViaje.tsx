@@ -35,7 +35,20 @@ export const autoVacio = (precio: string): AutoUI => ({
   precioEditado: false,
 });
 
-export function FormularioViaje({ id, hoy, opciones }: { id: string; hoy: string; opciones: OpcionesViaje }) {
+export function FormularioViaje({
+  id,
+  hoy,
+  opciones,
+  unidadInicial = null,
+  fechaInicial = null,
+}: {
+  id: string;
+  hoy: string;
+  opciones: OpcionesViaje;
+  /** Desde el calendario: la unidad y el día ya elegidos. */
+  unidadInicial?: string | null;
+  fechaInicial?: string | null;
+}) {
   const [estado, accion, enviando] = useActionState(crearViaje, estadoInicial);
   const { tarifas, unidades, choferes, clientes, vehiculos } = opciones;
 
@@ -44,10 +57,11 @@ export function FormularioViaje({ id, hoy, opciones }: { id: string; hoy: string
   const [origen, setOrigen] = useState("");
   const [destino, setDestino] = useState("");
   const [moneda, setMoneda] = useState<Moneda>("ARS");
-  const [fechaSalida, setFechaSalida] = useState(hoy);
+  const [fechaSalida, setFechaSalida] = useState(fechaInicial ?? hoy);
   const [fechaLlegada, setFechaLlegada] = useState("");
-  const [unidadId, setUnidadId] = useState<string | null>(null);
-  const [choferId, setChoferId] = useState<string | null>(null);
+  const inicial = opciones.unidades.find((u) => u.id === unidadInicial) ?? null;
+  const [unidadId, setUnidadId] = useState<string | null>(inicial?.id ?? null);
+  const [choferId, setChoferId] = useState<string | null>(inicial?.chofer_habitual_id ?? null);
   const [notas, setNotas] = useState("");
   const [autos, setAutos] = useState<AutoUI[]>(() => [autoVacio("")]);
   const [confirmarCero, setConfirmarCero] = useState(false);
