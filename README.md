@@ -62,6 +62,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/entregas.ts` | Avance de entregas por auto, fecha de entrega y textos de cancelar con anticipo (con tests) |
 | `lib/metricas.ts`, `components/graficos/` | Escalas, montos cortos y gráficos de la pantalla Métricas (HTML y SVG propios, sin librerías) |
 | `lib/recordatorio.ts` | Mensaje de recordatorio de cobro, número de WhatsApp en formato internacional y posibles clientes duplicados (con tests) |
+| `lib/configuracion.ts` | Lectura del CSV de tarifas que guarda Excel (con tests) |
 | `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
@@ -89,6 +90,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261130000000_entrega_y_cancelacion.sql` | Entrega por auto, cancelar con anticipo (seña o a favor del cliente, desaplicando pagos sin borrarlos) y usar el saldo a favor en otros viajes |
 | `20261201000000_metricas.sql` | Métricas de cobranza para los gráficos (por mes, antigüedad de la deuda, días de cobro, quién debe más) |
 | `20261202000000_clientes_y_recordatorios.sql` | Clientes con saldos (`v_clientes`), recordatorios de cobro por WhatsApp registrados, datos para cobrar de la empresa y avance de entregas en la grilla |
+| `20261203000000_configuracion.sql` | Configuración desde la app: tarifas, unidades, choferes y empresa (con sus reglas), importar tarifas, rutas sin duplicados, blindaje y mover un usuario de empresa (solo SQL Editor) |
 
 Para aplicar una (sirve desde el celular):
 
@@ -107,6 +109,17 @@ Para que funcione, una sola vez en Supabase:
 2. **Authentication → URL Configuration**: en **Site URL** poner la dirección de la app (por ejemplo `https://rovirosa-demo.netlify.app`) y agregar `https://rovirosa-demo.netlify.app/**` en **Redirect URLs**.
 
 El envío de mails del plan gratis de Supabase tiene un límite bajo (unos pocos por hora): alcanza para sumar de a una persona.
+
+## Arrancar la empresa real (una vez)
+
+`supabase/admin/arrancar_empresa_real.sql` crea la empresa limpia (sin datos de prueba), copia si querés las unidades y choferes de la demo, y pasa tu usuario a la empresa nueva como dueño. No es una migración: se corre a mano en el SQL Editor.
+
+1. Abrí el archivo en GitHub, tocá **Raw** y copiá todo.
+2. En el SQL Editor, pegalo y **completá la parte "Completá acá"**: tu email (el mismo con el que entrás), el del administrativo si ya lo tenés, y si querés copiar la flota.
+3. Tocá **Run**. Abajo aparecen los avisos de lo que hizo.
+4. Volvé a entrar a la app: vas a ver la empresa nueva vacía. Cargá las tarifas reales en **Configuración → Tarifas** (o importalas desde Excel) y revisá unidades y choferes.
+
+Si querés seguir mostrando la demo, poné otro email tuyo en `v_email_demo`: queda una invitación para entrar a la demo con ese usuario.
 
 ## Historia de demo para Métricas (opcional)
 

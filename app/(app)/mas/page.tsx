@@ -26,6 +26,15 @@ export default async function Mas() {
           <span className="text-sm font-normal text-slate-500">Fichas y saldos →</span>
         </Link>
       )}
+      {perfil && (
+        <Link
+          href="/configuracion"
+          className="flex min-h-14 items-center justify-between rounded-2xl bg-white px-5 py-3 text-lg font-semibold shadow-sm active:bg-slate-50 lg:hidden"
+        >
+          <span>⚙️ Configuración</span>
+          <span className="text-sm font-normal text-slate-500">Tarifas, unidades, choferes →</span>
+        </Link>
+      )}
       {perfil?.rol === "dueno" && (
         <Link
           href="/mas/datos-cobro"
