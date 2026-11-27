@@ -6,7 +6,7 @@ import type { TarifaConfig } from "@/lib/datos-configuracion";
 import { formatearPlata } from "@/lib/formato";
 import { calcularKm, type Estado, guardarTarifa } from "../../actions";
 import { campo, ErrorForm } from "../../componentes";
-import { CampoLugar } from "./CampoLugar";
+import { CampoLugar } from "@/components/CampoLugar";
 
 export function FormularioTarifa({ tarifa, calculoAutomatico, lugaresUsados }: { tarifa: TarifaConfig | null; calculoAutomatico: boolean; lugaresUsados: string[] }) {
   const [estado, accion, enviando] = useActionState<Estado, FormData>(guardarTarifa, { error: null });
@@ -36,6 +36,7 @@ export function FormularioTarifa({ tarifa, calculoAutomatico, lugaresUsados }: {
           valor={origen}
           propios={lugaresUsados}
           conServicio={calculoAutomatico}
+          clase={campo}
           onEscribir={(t) => { setOrigen(t); setUbicaciones((u) => ({ ...u, origen: null })); setCalculo(null); }}
           onElegir={(t, c) => { setOrigen(t); setUbicaciones((u) => ({ ...u, origen: c })); setCalculo(null); }}
         />
@@ -45,6 +46,7 @@ export function FormularioTarifa({ tarifa, calculoAutomatico, lugaresUsados }: {
           valor={destino}
           propios={lugaresUsados}
           conServicio={calculoAutomatico}
+          clase={campo}
           onEscribir={(t) => { setDestino(t); setUbicaciones((u) => ({ ...u, destino: null })); setCalculo(null); }}
           onElegir={(t, c) => { setDestino(t); setUbicaciones((u) => ({ ...u, destino: c })); setCalculo(null); }}
         />

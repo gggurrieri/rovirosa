@@ -35,6 +35,16 @@ const bmw = c.sql(`select i.id from public.items_viaje i join public.vehiculos v
   // Nuevo viaje: el campo está en cada auto
   await page.goto(`${c.APP}/viajes/nuevo`);
   c.ok((await page.locator("input[aria-label='Se entrega en, auto 1']").count()) === 1, "Nuevo viaje tiene 'Se entrega en' por auto");
+  // "Otra ruta": origen y destino con sugerencias (lugares ya usados y del mapa)
+  await page.click("button:has-text('Otra ruta')");
+  await page.fill("input[aria-label=Origen]", "Bue");
+  await page.waitForSelector("[role=option]:has-text('Ya usado en tus tarifas')");
+  await page.click("[role=option]:has-text('Buenos Aires')");
+  c.ok((await page.inputValue("input[aria-label=Origen]")) === "Buenos Aires", "Nuevo viaje: el origen sugiere lugares ya usados");
+  await page.locator("input[aria-label=Destino]").pressSequentially("Bari", { delay: 50 });
+  await page.waitForSelector("[role=option]:has-text('San Carlos de Bariloche')");
+  await page.click("[role=option]:has-text('San Carlos de Bariloche')");
+  c.ok((await page.inputValue("input[aria-label=Destino]")) === "San Carlos de Bariloche, RN, Argentina", "Nuevo viaje: el destino sugiere ciudades del mapa");
   c.ok(await c.sinScrollHorizontal(page), "Nuevo viaje sin scroll horizontal a 375 px");
 
   c.ok(page.errores.length === 0, `Sin errores de JavaScript ${page.errores.join(" ")}`);

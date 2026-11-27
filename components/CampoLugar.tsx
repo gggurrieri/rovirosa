@@ -2,8 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { type Coordenadas, filtrarPropios, type Lugar, MINIMO_SUGERENCIAS } from "@/lib/distancias";
-import { sugerir } from "../../actions";
-import { campo } from "../../componentes";
+import { sugerir } from "@/app/(app)/acciones-lugares";
 
 type Opcion = { nombre: string; coordenadas: Coordenadas | null; propio: boolean };
 
@@ -18,17 +17,25 @@ const memoria = new Map<string, Lugar[]>(); // lo ya buscado en esta pestaña no
 export function CampoLugar({
   nombre,
   etiqueta,
+  mostrarEtiqueta = true,
   valor,
   propios,
   conServicio,
+  deshabilitado = false,
+  clase,
   onEscribir,
   onElegir,
 }: {
-  nombre: string;
+  nombre?: string;
   etiqueta: string;
+  /** false: sin título arriba (la etiqueta queda como placeholder y para lectores de pantalla). */
+  mostrarEtiqueta?: boolean;
   valor: string;
   propios: string[];
   conServicio: boolean;
+  deshabilitado?: boolean;
+  /** Clases del input (cada formulario tiene su estilo). */
+  clase: string;
   onEscribir: (texto: string) => void;
   onElegir: (texto: string, coordenadas: Coordenadas | null) => void;
 }) {
@@ -73,9 +80,12 @@ export function CampoLugar({
 
   return (
     <label className="relative flex flex-col gap-1">
-      <span className="text-sm text-slate-600">{etiqueta}</span>
+      {mostrarEtiqueta && <span className="text-sm text-slate-600">{etiqueta}</span>}
       <input
         name={nombre}
+        aria-label={mostrarEtiqueta ? undefined : etiqueta}
+        placeholder={mostrarEtiqueta ? undefined : etiqueta}
+        disabled={deshabilitado}
         required
         maxLength={80}
         autoComplete="off"
@@ -105,7 +115,7 @@ export function CampoLugar({
             elegir(opciones[activo]);
           }
         }}
-        className={campo}
+        className={clase}
       />
       {visible && (
         <ul

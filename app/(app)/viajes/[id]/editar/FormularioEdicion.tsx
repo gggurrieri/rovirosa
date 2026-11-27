@@ -16,6 +16,7 @@ import {
 import { type Anticipo, textoAnticipo } from "@/lib/entregas";
 import { formatearPlata } from "@/lib/formato";
 import { CampoEntrega } from "@/components/CampoEntrega";
+import { CampoLugar } from "@/components/CampoLugar";
 import { avisosDisponibilidad } from "@/lib/viajes";
 import { editarViaje, type EstadoFormulario } from "../../actions";
 import { type AutoUI, autoVacio, TarjetaAuto } from "../../nuevo/FormularioViaje";
@@ -43,12 +44,16 @@ export function FormularioEdicion({
   version,
   original,
   opciones,
+  lugaresUsados = [],
+  conServicio = false,
 }: {
   viajeId: string;
   numero: number;
   version: string;
   original: ViajeOriginal;
   opciones: Omit<OpcionesViaje, "tarifas">;
+  lugaresUsados?: string[];
+  conServicio?: boolean;
 }) {
   const [estado, accion, enviando] = useActionState(editarViaje, estadoInicial);
   const { unidades, choferes, clientes, vehiculos } = opciones;
@@ -142,14 +147,10 @@ export function FormularioEdicion({
 
       {/* Ruta y fechas */}
       <section className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-600">Origen</span>
-          <input name="origen" value={origen} disabled={!puede("origen")} onChange={(e) => setOrigen(e.target.value)} className={campo} />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-600">Destino</span>
-          <input name="destino" value={destino} disabled={!puede("destino")} onChange={(e) => setDestino(e.target.value)} className={campo} />
-        </label>
+        <CampoLugar nombre="origen" etiqueta="Origen" valor={origen} deshabilitado={!puede("origen")} propios={lugaresUsados} conServicio={conServicio}
+          clase={campo} onEscribir={setOrigen} onElegir={(t) => setOrigen(t)} />
+        <CampoLugar nombre="destino" etiqueta="Destino" valor={destino} deshabilitado={!puede("destino")} propios={lugaresUsados} conServicio={conServicio}
+          clase={campo} onEscribir={setDestino} onElegir={(t) => setDestino(t)} />
         <label className="flex flex-col gap-1">
           <span className="text-sm text-slate-600">Salida</span>
           <input name="fecha_salida" type="date" value={fechaSalida} disabled={!puede("fecha_salida")} onChange={(e) => setFechaSalida(e.target.value)} className={campo} />

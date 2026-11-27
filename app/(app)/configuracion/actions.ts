@@ -5,7 +5,8 @@ import { z } from "zod";
 import { parsearPlata } from "@/lib/cobros";
 import { parsearCSVTarifas } from "@/lib/configuracion";
 import { obtenerSesion, puedeVerOperacion } from "@/lib/datos";
-import { calcularDistancia, type Conocidos, coordenadasValidas, type Lugar, type ResultadoDistancia, sugerirLugares } from "@/lib/distancias";
+import { calcularDistancia, type Conocidos, coordenadasValidas, type ResultadoDistancia } from "@/lib/distancias";
+import { configORS } from "@/lib/ors";
 import { mensajeDeBase } from "@/lib/errores";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
@@ -130,11 +131,6 @@ export async function importarTarifas(_anterior: Estado, formData: FormData): Pr
   redirect(`/configuracion/tarifas?creadas=${r.creadas}&actualizadas=${r.actualizadas}`);
 }
 
-const configORS = () => ({
-  clave: process.env.ORS_API_KEY ?? "",
-  url: process.env.ORS_URL ?? "https://api.heigit.org", // api.openrouteservice.org se dio de baja en 2026
-});
-
 /** "Calcular km" de una tarifa: consulta OpenRouteService desde el servidor (la clave no sale de acá). */
 export async function calcularKm(origen: string, destino: string, conocidos: Conocidos = {}): Promise<ResultadoDistancia> {
   const { perfil } = await obtenerSesion();
@@ -143,23 +139,4 @@ export async function calcularKm(origen: string, destino: string, conocidos: Con
     origen: coordenadasValidas(conocidos?.origen) ? conocidos.origen : null,
     destino: coordenadasValidas(conocidos?.destino) ? conocidos.destino : null,
   });
-}
-
-// Lo ya sugerido no se vuelve a pedir (ahorra cupo entre usuarios del mismo servidor).
-const memoriaSugerencias = new Map<string, Lugar[]>();
-
-/** Sugerencias de lugares mientras se escribe Origen o Destino. Nunca falla: sin datos, []. */
-export async function sugerir(texto: string): Promise<Lugar[]> {
-  const { perfil } = await obtenerSesion();
-  if (!puedeVerOperacion(perfil)) return [];
-  const t = String(texto).trim().slice(0, 80);
-  const clave = t.toLowerCase();
-  const guardado = memoriaSugerencias.get(clave);
-  if (guardado) return guardado;
-  const lugares = await sugerirLugares(t, configORS());
-  if (lugares.length > 0) {
-    if (memoriaSugerencias.size >= 500) memoriaSugerencias.delete(memoriaSugerencias.keys().next().value!);
-    memoriaSugerencias.set(clave, lugares);
-  }
-  return lugares;
 }
