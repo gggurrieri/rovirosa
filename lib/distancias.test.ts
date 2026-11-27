@@ -27,7 +27,7 @@ describe("calcularDistancia", () => {
     expect(r).toEqual({ ok: true, km: 1580, origen: "Buenos Aires, CABA, Argentina", destino: "San Carlos de Bariloche, RN, Argentina" });
     const [urlRuta, initRuta] = f.mock.calls[2];
     expect(String(urlRuta)).toBe("https://ors.test/openrouteservice/v2/directions/driving-hgv");
-    expect(JSON.parse(String(initRuta?.body))).toMatchObject({ coordinates: [[-58.38, -34.6], [-71.31, -41.13]], radiuses: [-1, -1] });
+    expect(JSON.parse(String(initRuta?.body))).toEqual({ coordinates: [[-58.38, -34.6], [-71.31, -41.13]], instructions: false });
     expect((initRuta?.headers as Record<string, string>).Authorization).toBe("k");
     const geo = new URL(String(f.mock.calls[0][0]));
     expect(geo.pathname).toBe("/pelias/v1/search");
@@ -47,6 +47,10 @@ describe("calcularDistancia", () => {
     const geo = { "geo:*": () => json(200, lugar("X", -58, -34)) };
     const sinRuta = await calcularDistancia("A", "B", { ...config, fetch: servidor({ ...geo, "ruta:*": json(404, { error: { code: 2009 } }) }) });
     expect(sinRuta).toEqual({ ok: false, error: "No encontré un camino por ruta entre esos lugares." });
+    const lejos = await calcularDistancia("A", "B", { ...config, fetch: servidor({ ...geo, "ruta:*": json(404, { error: { code: 2010 } }) }) });
+    expect(lejos.ok === false && lejos.error).toMatch(/lejos de una ruta/);
+    const raro = await calcularDistancia("A", "B", { ...config, fetch: servidor({ ...geo, "ruta:*": json(400, { error: { code: 2004, message: "limits" } }) }) });
+    expect(raro.ok === false && raro.error).toMatch(/código 2004/);
     const cupo = await calcularDistancia("A", "B", { ...config, fetch: servidor({ "geo:*": json(429, {}) }) });
     expect(cupo.ok === false && cupo.error).toMatch(/cupo de consultas de hoy/);
     const caido = await calcularDistancia("A", "B", { ...config, fetch: vi.fn(async () => { throw new Error("ECONNREFUSED"); }) });

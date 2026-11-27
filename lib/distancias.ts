@@ -39,16 +39,26 @@ export async function calcularDistancia(origen: string, destino: string, config:
     const r = await pedir(f, `${config.url}/openrouteservice/v2/directions/driving-hgv`, {
       method: "POST",
       headers: { Authorization: config.clave, "Content-Type": "application/json", Accept: "application/json" },
-      // radiuses -1: si el punto cae lejos de una calle (localidad chica), se engancha en la ruta más cercana.
-      body: JSON.stringify({ coordinates: [desde!.coordenadas, hasta!.coordenadas], radiuses: [-1, -1], instructions: false }),
+      // Sin "radiuses": el servidor público rechaza la búsqueda sin límite. Como solo se usan
+      // ciudades y localidades, su centro queda cerca de una calle.
+      body: JSON.stringify({ coordinates: [desde!.coordenadas, hasta!.coordenadas], instructions: false }),
     });
-    if (r.status === 404 || r.status === 400) return { ok: false, error: "No encontré un camino por ruta entre esos lugares." };
+    if (!r.ok && r.status !== 429 && r.status !== 401 && r.status !== 403) {
+      const detalle = await r.json().catch(() => null);
+      const codigo = Number(detalle?.error?.code ?? 0);
+      // 2010: un punto quedó lejos de cualquier calle · 2009 (o 404): no hay camino por ruta
+      if (codigo === 2010) return { ok: false, error: "Uno de los lugares quedó lejos de una ruta. Elegí la ciudad de la lista de sugerencias." };
+      if (codigo === 2009 || r.status === 404) return { ok: false, error: "No encontré un camino por ruta entre esos lugares." };
+      console.error("[ors] ruta", r.status, codigo, detalle?.error?.message ?? "");
+      return { ok: false, error: `No se pudo calcular ahora (código ${codigo || r.status}). Probá en un rato o mirá los km en Google Maps.` };
+    }
     revisar(r);
     const metros = (await r.json())?.routes?.[0]?.summary?.distance;
     if (typeof metros !== "number" || metros <= 0) return { ok: false, error: "No encontré un camino por ruta entre esos lugares." };
     return { ok: true, km: Math.max(1, Math.round(metros / 1000)), origen: desde!.nombre, destino: hasta!.nombre };
   } catch (e) {
     if (e instanceof ErrorServicio) return { ok: false, error: e.message };
+    console.error("[ors] sin respuesta", e instanceof Error ? e.name : e);
     return { ok: false, error: "No se pudo calcular ahora. Probá en un rato o mirá los km en Google Maps." };
   }
 }
@@ -119,7 +129,10 @@ function pedir(f: typeof fetch, url: string, init: RequestInit) {
 function revisar(r: Response) {
   if (r.status === 429) throw new ErrorServicio("Se terminó el cupo de consultas de hoy. Mañana vuelve a andar; mientras, mirá los km en Google Maps.");
   if (r.status === 401 || r.status === 403) throw new ErrorServicio("La clave de OpenRouteService no es válida. Revisala en Netlify (ORS_API_KEY).");
-  if (!r.ok) throw new ErrorServicio("No se pudo calcular ahora. Probá en un rato o mirá los km en Google Maps.");
+  if (!r.ok) {
+    console.error("[ors]", r.status, r.url.replace(/api_key=[^&]+/, "api_key=…"));
+    throw new ErrorServicio(`No se pudo calcular ahora (código ${r.status}). Probá en un rato o mirá los km en Google Maps.`);
+  }
 }
 
 /** Abre Google Maps con la ruta armada, para comparar o cargar los km a mano. */
