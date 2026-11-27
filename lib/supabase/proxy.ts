@@ -9,6 +9,8 @@ const RUTAS_PUBLICAS = ["/login", "/registro", "/auth/confirmar"];
  * cookies nuevas) y redirige a /login si no hay usuario.
  */
 export async function actualizarSesion(request: NextRequest) {
+  // El link del calendario lo piden Google, el iPhone u Outlook, sin sesión: ni login ni cookies.
+  if (request.nextUrl.pathname.startsWith("/ics/")) return NextResponse.next();
   const { url, anonKey } = configSupabase();
   let respuesta = NextResponse.next({ request });
 

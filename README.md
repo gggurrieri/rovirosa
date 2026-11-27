@@ -64,6 +64,7 @@ Después abrí en el celular `http://IP-DE-TU-COMPU:3000`.
 | `lib/recordatorio.ts` | Mensaje de recordatorio de cobro, número de WhatsApp en formato internacional y posibles clientes duplicados (con tests) |
 | `lib/configuracion.ts` | Lectura del CSV de tarifas que guarda Excel (con tests) |
 | `lib/calendario.ts` | Rango de 2 semanas o mes, barras en carriles, choques y estado de cada unidad por día (con tests) |
+| `lib/ics.ts` | Calendario iCal para suscribirse desde Google, iPhone u Outlook, y link "Agregar a Google Calendar" (con tests) |
 | `lib/usuarios.ts` | Estados de las invitaciones y mensaje para mandar por WhatsApp (con tests) |
 | `lib/datos*.ts` | Consultas a Supabase (generales, cobros y viajes) |
 | `lib/supabase/` | Clientes de Supabase y refresco de sesión |
@@ -93,6 +94,7 @@ Cada cambio de base viene en un archivo nuevo dentro de `supabase/migrations/`, 
 | `20261202000000_clientes_y_recordatorios.sql` | Clientes con saldos (`v_clientes`), recordatorios de cobro por WhatsApp registrados, datos para cobrar de la empresa y avance de entregas en la grilla |
 | `20261203000000_configuracion.sql` | Configuración desde la app: tarifas, unidades, choferes y empresa (con sus reglas), importar tarifas, rutas sin duplicados, blindaje y mover un usuario de empresa (solo SQL Editor) |
 | `20261204000000_calendario.sql` | Calendario: agenda por rango, bloqueos (service, VTV, francos) que se anulan con motivo y avisan choques |
+| `20261205000000_calendario_google.sql` | Calendario en Google: link personal (token) que se puede regenerar; el feed trae fechas, rutas y unidades, nunca precios ni clientes |
 
 Para aplicar una (sirve desde el celular):
 

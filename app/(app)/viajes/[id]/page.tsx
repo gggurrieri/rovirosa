@@ -8,6 +8,8 @@ import { obtenerViaje } from "@/lib/datos-viajes";
 import { formatearFecha, formatearPlata, hoyEnArgentina } from "@/lib/formato";
 import { formatearMomento, type LineaHistorial } from "@/lib/historial";
 import { NOMBRE_ESTADO } from "@/lib/viajes";
+import { linkGoogleCalendar } from "@/lib/ics";
+import { urlBase } from "@/lib/url-base";
 import { progresoEntrega, totalCobrado } from "@/lib/entregas";
 import { puedeCancelar } from "@/lib/viajes";
 import { AccionesEstado } from "./AccionesEstado";
@@ -37,6 +39,14 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
   const hoy = hoyEnArgentina();
   const progreso = progresoEntrega(viaje.autos);
   const conEntrega = viaje.estado === "en_viaje" || viaje.estado === "entregado";
+  const linkGoogle = linkGoogleCalendar(
+    {
+      id: viaje.id, numero: viaje.numero, fecha_salida: viaje.fecha_salida, fecha_llegada: viaje.fecha_llegada_estimada,
+      origen: viaje.origen, destino: viaje.destino, estado: viaje.estado, unidad: viaje.unidad, chofer: viaje.chofer,
+      autos: viaje.autos.filter((a) => a.estado_cobro !== "cancelado").length,
+    },
+    `${await urlBase()}/viajes/${viaje.id}`,
+  );
   const clientes = [...new Set(viaje.autos.filter((a) => a.estado_cobro !== "cancelado").map((a) => a.cliente_nombre))].join(" y ");
 
   return (
@@ -78,6 +88,16 @@ export default async function DetalleViaje({ params, searchParams }: PageProps<"
         >
           ✏️ Editar viaje
         </Link>
+        {viaje.estado !== "cancelado" && (
+          <a
+            href={linkGoogle}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 flex h-12 items-center justify-center rounded-xl text-base font-medium text-sky-700 active:bg-slate-50 lg:ml-2 lg:inline-flex lg:h-11 lg:px-4"
+          >
+            📅 Agregar a Google Calendar
+          </a>
+        )}
       </section>
 
       <AccionesEstado

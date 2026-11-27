@@ -35,6 +35,15 @@ export default async function Mas() {
           <span className="text-sm font-normal text-slate-500">Tarifas, unidades, choferes →</span>
         </Link>
       )}
+      {(perfil?.rol === "dueno" || perfil?.rol === "administrativo") && (
+        <Link
+          href="/mas/calendario-google"
+          className="flex min-h-14 items-center justify-between rounded-2xl bg-white px-5 py-3 text-lg font-semibold shadow-sm active:bg-slate-50"
+        >
+          <span>📅 Calendario en Google</span>
+          <span className="text-sm font-normal text-slate-500">Viajes en tu celular →</span>
+        </Link>
+      )}
       {perfil?.rol === "dueno" && (
         <Link
           href="/mas/datos-cobro"
