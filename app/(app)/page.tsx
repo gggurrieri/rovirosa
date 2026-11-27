@@ -137,6 +137,14 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
           </Link>
         </section>
 
+        <Link
+          href="/calendario"
+          className="flex min-h-14 items-center justify-between rounded-2xl bg-white px-4 py-3 text-base font-semibold shadow-sm active:bg-slate-50 lg:hidden"
+        >
+          <span>🚚 ¿Quién está libre?</span>
+          <span className="text-sm font-normal text-slate-500">Unidades por día →</span>
+        </Link>
+
         {reclamar.length > 0 && (
           <section aria-label="Para reclamar" className="flex flex-col gap-3">
             <h2 className="text-lg font-semibold">Para reclamar</h2>

@@ -54,7 +54,7 @@ export async function obtenerOpcionesViaje(): Promise<OpcionesViaje> {
       .select("numero, origen, destino, unidad_id, chofer_id, fecha_salida, fecha_llegada_estimada, estado")
       .gte("fecha_salida", desde)
       .neq("estado", "cancelado"),
-    supabase.from("bloqueos_disponibilidad").select("unidad_id, chofer_id, desde, hasta, motivo").gte("hasta", desde),
+    supabase.from("bloqueos_disponibilidad").select("unidad_id, chofer_id, desde, hasta, motivo").gte("hasta", desde).is("anulado_en", null),
   ]);
   for (const [que, r] of [
     ["las tarifas", tarifas],

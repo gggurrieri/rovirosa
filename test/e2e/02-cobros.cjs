@@ -71,6 +71,9 @@ const c = require("./comun.cjs");
 
   // Anular el pago de Concesionaria Norte
   const pagoNorte = c.sql("select id from pagos where monto_centavos = 200000000");
+  // Lo vencido antes de anular depende de la fecha (los pagos de arriba pueden caer en autos
+  // vencidos o no): se toma de la base. Anular tiene que devolver exactamente los $ 2.000.000.
+  const vencidoAntesDeAnular = c.vencido();
   await page.goto(`${c.APP}/cobros/pagos/${pagoNorte}/anular`);
   await page.click("button[type=submit]");
   await page.waitForTimeout(300);
@@ -81,7 +84,8 @@ const c = require("./comun.cjs");
   c.ok(t.includes("Pago anulado") && t.includes("Anulado: Lo cargué con el monto equivocado"), "Pago anulado visible con su motivo");
   await page.goto(`${c.APP}/`);
   t = await c.texto(page);
-  c.ok(t.includes("Por cobrar $ 7.100.000") && t.includes(`Vencido ${c.plata(vencidoAntes)}`), "Tras anular, el vencido vuelve y queda $ 7.100.000 por cobrar");
+  c.ok(t.includes("Por cobrar $ 7.100.000") && c.vencido() === vencidoAntesDeAnular + 200_000_000 && t.includes(`Vencido ${c.plata(c.vencido())}`),
+    "Tras anular, el vencido vuelve ($ 2.000.000 más) y queda $ 7.100.000 por cobrar");
   await page.goto(`${c.APP}/cobros/pagos/${pagoNorte}/anular`);
   c.ok((await c.texto(page)).includes("Este pago ya está anulado"), "No ofrece anular dos veces");
   c.ok(page.errores.length === 0, `Sin errores de JavaScript ${page.errores.join(" ")}`);
