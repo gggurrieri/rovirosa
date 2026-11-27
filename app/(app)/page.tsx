@@ -66,7 +66,7 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
             className="min-w-0 rounded-2xl bg-white p-4 shadow-sm active:bg-slate-50"
           >
             <p className="text-sm font-medium text-slate-600">Por cobrar</p>
-            <p className="mt-1 text-xl font-bold wrap-anywhere tabular-nums">
+            <p className="mt-1 text-lg font-bold wrap-anywhere tabular-nums min-[400px]:text-xl">
               <Montos montos={porCobrar} />
             </p>
           </Link>
@@ -76,7 +76,7 @@ export default async function Inicio({ searchParams }: PageProps<"/">) {
           >
             <p className="text-sm font-medium text-slate-600">Vencido</p>
             <p
-              className={`mt-1 text-xl font-bold wrap-anywhere tabular-nums ${tieneMonto(vencido) ? "text-red-700" : ""}`}
+              className={`mt-1 text-lg font-bold wrap-anywhere tabular-nums min-[400px]:text-xl ${tieneMonto(vencido) ? "text-red-700" : ""}`}
             >
               <Montos montos={vencido} />
             </p>
