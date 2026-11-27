@@ -17,6 +17,13 @@ const pedir = (ruta) => fetch(`${c.APP}${ruta}`, { redirect: "manual" }); // sin
   const sc = await pedir("/sin-conexion");
   c.ok(sc.status === 200 && (await sc.text()).includes("Sin conexión"), "La página Sin conexión se baja sin sesión (no redirige al login)");
 
+  // Encabezados de seguridad (también en lo que se baja sin sesión)
+  for (const ruta of ["/login", "/manifest.webmanifest", "/sin-conexion"]) {
+    const h = (await pedir(ruta)).headers;
+    c.ok(h.get("x-frame-options") === "DENY" && h.get("x-content-type-options") === "nosniff" && (h.get("permissions-policy") ?? "").includes("camera=()"),
+      `Encabezados de seguridad en ${ruta}`);
+  }
+
   const navegador = await c.abrirNavegador();
   const page = await c.nuevaPagina(navegador);
   await c.entrar(page, "dueno@demo.com");

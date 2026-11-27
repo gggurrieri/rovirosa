@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { obtenerSesion } from "@/lib/datos";
-import { obtenerUsuarios } from "@/lib/datos-usuarios";
+import { textoUso } from "@/lib/adopcion";
+import { obtenerUso, obtenerUsuarios } from "@/lib/datos-usuarios";
+import { hoyEnArgentina } from "@/lib/formato";
 import { estadoInvitacion, linkWhatsApp, mensajeInvitacion, NOMBRE_ROL, textoVence } from "@/lib/usuarios";
 import { anularInvitacion, cambiarActivo } from "./actions";
 import { BotonAccion } from "./BotonAccion";
@@ -28,7 +30,8 @@ export default async function Usuarios({ searchParams }: PageProps<"/mas/usuario
   }
 
   const { invitada, hecho } = await searchParams;
-  const { usuarios, invitaciones } = await obtenerUsuarios();
+  const hoy = hoyEnArgentina();
+  const [{ usuarios, invitaciones }, uso] = await Promise.all([obtenerUsuarios(), obtenerUso(hoy)]);
   const encabezados = await headers();
   const host = encabezados.get("x-forwarded-host") ?? encabezados.get("host") ?? "";
   const protocolo = encabezados.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
@@ -83,6 +86,11 @@ export default async function Usuarios({ searchParams }: PageProps<"/mas/usuario
                       {NOMBRE_ROL[u.rol]}
                       {!u.activo && <span className="ml-2 font-medium text-red-700">· Desactivado</span>}
                     </p>
+                    {u.activo && (
+                      <p className={`mt-1 text-sm ${(uso[u.user_id]?.dias7 ?? 0) === 0 ? "font-medium text-amber-800" : "text-slate-600"}`}>
+                        {textoUso(uso[u.user_id], hoy)}
+                      </p>
+                    )}
                   </div>
                   {u.user_id !== userId && u.rol !== "chofer" && (
                     <BotonAccion
