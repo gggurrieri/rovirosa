@@ -68,7 +68,7 @@ jobs:
 
       - name: Guardar capturas y registros si algo falló
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: capturas-y-registros
           path: ${{ runner.temp }}/capturas
