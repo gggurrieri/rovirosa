@@ -108,6 +108,8 @@ Desde el celular: **Más → Instalá la app** (Android: un botón; iPhone: Comp
 - El navegador solo usa la clave pública de Supabase; la de OpenRouteService y la conexión de los backups viven en Netlify y GitHub como secretos.
 - Encabezados de seguridad en todas las respuestas (`next.config.ts`): sin marcos de otros sitios, sin cámara, micrófono ni ubicación.
 - En Supabase conviene: **Authentication → Providers → Email → contraseña mínima de 8** y "Confirm email" activado.
+- **Librerías**: la CI corta si alguna librería que se publica tiene una falla de seguridad alta o crítica conocida (`npm audit`). Dependabot (`.github/dependabot.yml`) abre cada lunes los PR con actualizaciones; las chicas llegan juntas en uno solo. Si la CI falla por `npm audit`, la solución es actualizar esa librería (normalmente unir el PR de Dependabot).
+- **Cuentas**: lo más importante es la verificación en dos pasos (2FA) en GitHub, Supabase, Netlify y el mail del dueño. Quien entra a esas cuentas controla todo.
 
 ## Aplicar una migración nueva en Supabase
 
